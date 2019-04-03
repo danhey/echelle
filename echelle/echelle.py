@@ -1,5 +1,7 @@
 from __future__ import print_function, division
 
+import warnings
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -41,13 +43,14 @@ def echelle(freq, power, dnu, offset=0.0):
 
     xn = np.arange(1,n_element+1)/n_element * dnu
     z = np.zeros([n_stack*morerow,n_element])
+    # This should be vectorized for speed-up
     for i in range(n_stack):
         for j in range(i*morerow,(i+1)*morerow):
             z[j,:] = yp[n_element*(i):n_element*(i+1)]
     return xn, yn, z
 
 def plot_echelle(freq, power, dnu, offset=0.0,
-                 ax=None, levels=500, cmap='gray_r'):
+                 ax=None, nlevels=32, cmap='gray_r'):
     """
     Plots the echelle diagram for a given amplitude (or power) spectrum
     Args:
@@ -58,11 +61,12 @@ def plot_echelle(freq, power, dnu, offset=0.0,
     """
 
     echx, echy, echz = echelle(freq, power, dnu, offset=0.0,)
-
+    echz = np.sqrt(echz)
     if ax is None:
         fig, ax = plt.subplots()
 
-    levels = np.linspace(np.min(echz),np.max(echz),levels)
+    levels = np.linspace(np.min(echz),np.max(echz),nlevels)
+    # Using levels is very slow for some reason.. 
     ax.contourf(echx,echy,echz,cmap=cmap,levels=levels)
     ax.axis([np.min(echx),np.max(echx),np.min(echy),np.max(echy)])
     
@@ -96,9 +100,9 @@ def interact_echelle(freq, power, dnu, notebook_url='localhost:8888'):
     servers = list(notebookapp.list_running_servers())
     ports = [s['port'] for s in servers]
     if len(np.unique(ports)) > 1:
-        raise ValueError("You have multiple Jupyter servers open. \
+        warnings.warn("You have multiple Jupyter servers open. \
         You will need to pass the current notebook to `notebook_url`. \
-        i.e. interact_echelle(x,x,notebook_url='http://localhost:8888')")
+        i.e. interact_echelle(x,x,notebook_url='http://localhost:8888')",UserWarning)
 
     def create_interact_ui(doc):
 
@@ -115,9 +119,9 @@ def interact_echelle(freq, power, dnu, notebook_url='localhost:8888'):
         plot.xaxis.axis_label=u'Frequency mod \u0394\u03BD'
         plot.yaxis.axis_label='Frequency'
 
-
         slider = Slider(start=dnu-2., end=dnu+2., value=dnu, step=.001, title=u"\u0394\u03BD")
-
+            
+        # Slider callback
         def update_upon_dnu_change(attr, old, new):
             _,_, z = echelle(freq,power,new)
             full_plot.data_source.data['image'] = [np.sqrt(z)]
