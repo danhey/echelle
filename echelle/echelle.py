@@ -5,10 +5,12 @@ import matplotlib.pyplot as plt
 
 __all__ = ["echelle", "plot_echelle", "interact_echelle"]
 
-def echelle(freq, power, dnu, fmin, fmax, offset=0.0):
+def echelle(freq, power, dnu, offset=0.0):
 
     if len(freq) != len(power): 
         raise ValueError("x and y must have equal size.")	
+
+    fmin, fmax = freq[0], freq[-1]
 
     fmin = fmin - offset
     fmax = fmax - offset
@@ -22,7 +24,6 @@ def echelle(freq, power, dnu, fmin, fmax, offset=0.0):
     # trim data
     index = np.intersect1d(np.where(freq>=fmin)[0],np.where(freq<=fmax)[0])
     trimx = freq[index]
-    trimy = freq[index]
 
     samplinginterval = np.median(trimx[1:-1] - trimx[0:-2]) * 0.1
     xp = np.arange(fmin,fmax+dnu,samplinginterval)
@@ -45,10 +46,18 @@ def echelle(freq, power, dnu, fmin, fmax, offset=0.0):
             z[j,:] = yp[n_element*(i):n_element*(i+1)]
     return xn, yn, z
 
-def plot_echelle(freq, power, dnu, fmin, fmax, offset=0.0,
+def plot_echelle(freq, power, dnu, offset=0.0,
                  ax=None, levels=500, cmap='gray_r'):
+    """
+    Plots the echelle diagram for a given amplitude (or power) spectrum
+    Args:
+    freq (array-like): Frequencies of the spectrum
+    power (array-like): Power or amplitude of the spectrum
+    dnu (float): Large separation value
+    offset (float): Amount by which to offset the echelle diagram
+    """
 
-    echx, echy, echz = echelle(freq, power, dnu, fmin, fmax, offset=0.0,)
+    echx, echy, echz = echelle(freq, power, dnu, offset=0.0,)
 
     if ax is None:
         fig, ax = plt.subplots()
@@ -62,8 +71,16 @@ def plot_echelle(freq, power, dnu, fmin, fmax, offset=0.0,
     
     return ax
 
-def interact_echelle(freq, power, dnu, fmin, fmax, notebook_url='localhost:8888'):
-
+def interact_echelle(freq, power, dnu, notebook_url='localhost:8888'):
+    """
+    Plots an interactive echelle diagram with a variable dnu slider.
+    This method requires Bokeh to run, and wil.
+    Args:
+    freq (array-like): Frequencies of the spectrum
+    power (array-like): Power or amplitude of the spectrum
+    dnu (float): Large separation value
+    notebook_url (str): Current url of the notebook. Defaults to `localhost:8888`
+    """
     try:
         import bokeh
     except:
@@ -75,9 +92,17 @@ def interact_echelle(freq, power, dnu, fmin, fmax, notebook_url='localhost:8888'
     from bokeh.layouts import column
     from bokeh.models import CustomJS, ColumnDataSource, Slider
 
+    from notebook import notebookapp
+    servers = list(notebookapp.list_running_servers())
+    ports = [s['port'] for s in servers]
+    if len(np.unique(ports)) > 1:
+        raise ValueError("You have multiple Jupyter servers open. \
+        You will need to pass the current notebook to `notebook_url`. \
+        i.e. interact_echelle(x,x,notebook_url='http://localhost:8888')")
+
     def create_interact_ui(doc):
 
-        x, y, z = echelle(freq,power,dnu,fmin, fmax)
+        x, y, z = echelle(freq,power,dnu)
         source = ColumnDataSource(data={'image':[np.sqrt(z)]})
 
         plot = figure(x_range=(x.min(), x.max()), y_range=(y.min(), y.max()))
@@ -87,17 +112,17 @@ def interact_echelle(freq, power, dnu, fmin, fmax, notebook_url='localhost:8888'
                 dw=x.max(), dh=y.max(), source=source,
                 palette=cmap)
 
-        plot.xaxis.axis_label=r'Frequency mod $\Delta\nu$'
+        plot.xaxis.axis_label=u'Frequency mod \u0394\u03BD'
         plot.yaxis.axis_label='Frequency'
 
 
-        slider = Slider(start=dnu-2., end=dnu+2., value=dnu, step=.001, title=r'$\Delta\nu$')
+        slider = Slider(start=dnu-2., end=dnu+2., value=dnu, step=.001, title=u"\u0394\u03BD")
 
-        def update_upon_cadence_change(attr, old, new):
-            _,_, z = echelle(freq,power,new,15,80)
+        def update_upon_dnu_change(attr, old, new):
+            _,_, z = echelle(freq,power,new)
             full_plot.data_source.data['image'] = [np.sqrt(z)]
         
-        slider.on_change('value', update_upon_cadence_change)
+        slider.on_change('value', update_upon_dnu_change)
 
         # Layout all of the plots
         widgets_and_figures = column(slider,plot)
