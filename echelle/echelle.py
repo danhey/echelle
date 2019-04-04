@@ -96,6 +96,11 @@ def interact_echelle(freq, power, dnu, notebook_url='localhost:8888'):
     from bokeh.layouts import column
     from bokeh.models import CustomJS, ColumnDataSource, Slider
 
+    import warnings
+    from bokeh.util.warnings import BokehUserWarning
+    # This is a terrible hack and I hate Bokeh
+    warnings.simplefilter("ignore", BokehUserWarning)
+
     from notebook import notebookapp
     servers = list(notebookapp.list_running_servers())
     ports = [s['port'] for s in servers]
@@ -107,13 +112,14 @@ def interact_echelle(freq, power, dnu, notebook_url='localhost:8888'):
     def create_interact_ui(doc):
 
         x, y, z = echelle(freq,power,dnu)
-        source = ColumnDataSource(data={'image':[np.sqrt(z)]})
+        source = ColumnDataSource(data={'image':[np.sqrt(z)] ,'x': x, 'y':y, 
+                                        'dw':[x.max()-x.min()], 'dh':[y.max()-y.min()]})
 
         plot = figure(x_range=(x.min(), x.max()), y_range=(y.min(), y.max()))
 
         cmap = grey(256)[::-1]
-        full_plot = plot.image(image='image', x=x.min(), y=y.min(), 
-                dw=x.max(), dh=y.max(), source=source,
+        full_plot = plot.image(image='image', x='x', y='y', 
+                dw='dw', dh=y.max()-y.min(), source=source,
                 palette=cmap)
 
         plot.xaxis.axis_label=u'Frequency mod \u0394\u03BD'
@@ -123,8 +129,13 @@ def interact_echelle(freq, power, dnu, notebook_url='localhost:8888'):
             
         # Slider callback
         def update_upon_dnu_change(attr, old, new):
-            _,_, z = echelle(freq,power,new)
+            x,y, z = echelle(freq,power,new)
             full_plot.data_source.data['image'] = [np.sqrt(z)]
+            full_plot.data_source.data['dw'] = [x.max()-x.min()]
+            #full_plot.data_source.data.update({'image' : [np.sqrt(z)],
+            #                           'dw' : [x.max()-x.min()]})
+            plot.x_range.start=x.min()
+            plot.x_range.end=x.max()
         
         slider.on_change('value', update_upon_dnu_change)
 
