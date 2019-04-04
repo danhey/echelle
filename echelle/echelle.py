@@ -4,6 +4,7 @@ import warnings
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import get_backend
 
 __all__ = ["echelle", "plot_echelle", "interact_echelle"]
 
@@ -75,73 +76,35 @@ def plot_echelle(freq, power, dnu, offset=0.0,
     
     return ax
 
-def interact_echelle(freq, power, dnu, notebook_url='localhost:8888'):
+def interact_echelle(freq, power, dnu):
     """
     Plots an interactive echelle diagram with a variable dnu slider.
-    This method requires Bokeh to run, and wil.
     Args:
     freq (array-like): Frequencies of the spectrum
     power (array-like): Power or amplitude of the spectrum
     dnu (float): Large separation value
-    notebook_url (str): Current url of the notebook. Defaults to `localhost:8888`
     """
-    try:
-        import bokeh
-    except:
-        raise ImportError('Bokeh is definitely required for this.')
 
-    from bokeh.io import show, output_notebook, push_notebook
-    from bokeh.plotting import figure, ColumnDataSource
-    from bokeh.palettes import grey
-    from bokeh.layouts import column
-    from bokeh.models import CustomJS, ColumnDataSource, Slider
+    from ipywidgets import interact
+    mpl_is_inline = 'nbAgg' in get_backend()
+    if not mpl_is_inline:
+        print("You should be using %matplotlib notebook otherwise this won't work")
 
-    import warnings
-    from bokeh.util.warnings import BokehUserWarning
-    # This is a terrible hack and I hate Bokeh
-    warnings.simplefilter("ignore", BokehUserWarning)
+    x,y,z=echelle(freq, power, dnu, offset=0.0)
+    fig, ax = plt.subplots(figsize=[7,7])
+    line = ax.imshow(np.sqrt(z), aspect='auto', 
+                    extent=(x.min(), x.max(), y.min(), y.max()), 
+                    origin='lower',
+                    cmap='gray_r')
 
-    from notebook import notebookapp
-    servers = list(notebookapp.list_running_servers())
-    ports = [s['port'] for s in servers]
-    if len(np.unique(ports)) > 1:
-        warnings.warn("You have multiple Jupyter servers open. \
-        You will need to pass the current notebook to `notebook_url`. \
-        i.e. interact_echelle(x,x,notebook_url='http://localhost:8888')",UserWarning)
+    def update(dnu):
+        x,y,z=echelle(freq, power, dnu, offset=0.0)
+        line.set_array(np.sqrt(z))
+        line.set_extent((x.min(), x.max(), y.min(), y.max()))
+        ax.set_xlim(0,dnu)
+        fig.canvas.draw()
 
-    def create_interact_ui(doc):
-
-        x, y, z = echelle(freq,power,dnu)
-        source = ColumnDataSource(data={'image':[np.sqrt(z)] ,'x': x, 'y':y, 
-                                        'dw':[x.max()-x.min()], 'dh':[y.max()-y.min()]})
-
-        plot = figure(x_range=(x.min(), x.max()), y_range=(y.min(), y.max()))
-
-        cmap = grey(256)[::-1]
-        full_plot = plot.image(image='image', x='x', y='y', 
-                dw='dw', dh=y.max()-y.min(), source=source,
-                palette=cmap)
-
-        plot.xaxis.axis_label=u'Frequency mod \u0394\u03BD'
-        plot.yaxis.axis_label='Frequency'
-
-        slider = Slider(start=dnu-2., end=dnu+2., value=dnu, step=.001, title=u"\u0394\u03BD")
-            
-        # Slider callback
-        def update_upon_dnu_change(attr, old, new):
-            x,y, z = echelle(freq,power,new)
-            full_plot.data_source.data['image'] = [np.sqrt(z)]
-            full_plot.data_source.data['dw'] = [x.max()-x.min()]
-            #full_plot.data_source.data.update({'image' : [np.sqrt(z)],
-            #                           'dw' : [x.max()-x.min()]})
-            plot.x_range.start=x.min()
-            plot.x_range.end=x.max()
-        
-        slider.on_change('value', update_upon_dnu_change)
-
-        # Layout all of the plots
-        widgets_and_figures = column(slider,plot)
-        doc.add_root(widgets_and_figures)
-
-    output_notebook(verbose=False, hide_banner=True)
-    return show(create_interact_ui, notebook_url=notebook_url)
+    ax.set_xlabel(u'Frequency mod \u0394\u03BD')
+    ax.set_ylabel('Frequency')
+    
+    interact(update, dnu=(dnu-2.,dnu+2.,0.01))
