@@ -6,6 +6,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import get_backend
 
+from matplotlib.widgets import Slider
+
 __all__ = ["echelle", "plot_echelle", "interact_echelle"]
 
 def echelle(freq, power, dnu, offset=0.0):
@@ -76,35 +78,75 @@ def plot_echelle(freq, power, dnu, offset=0.0,
     
     return ax
 
-def interact_echelle(freq, power, dnu):
+def interact_echelle(freq, power, dnu_min, dnu_max, step=0.01,
+                    cmap='gray_r', notebook=False):
     """
     Plots an interactive echelle diagram with a variable dnu slider.
     Args:
     freq (array-like): Frequencies of the spectrum
     power (array-like): Power or amplitude of the spectrum
-    dnu (float): Large separation value
+    dnu_min (float): Minimum large separation
+    dnu_max (float): Maximum large separation
     """
+    if notebook:
+        from ipywidgets import interact
+        mpl_is_inline = 'nbAgg' in get_backend()
+        if not mpl_is_inline:
+            print("You should be using %matplotlib notebook "
+                "otherwise this won't work")
+        
+        if dnu_max < dnu_min:
+            raise ValueError('Maximum range can not be less than minimum')
 
-    from ipywidgets import interact
-    mpl_is_inline = 'nbAgg' in get_backend()
-    if not mpl_is_inline:
-        print("You should be using %matplotlib notebook otherwise this won't work")
+        x,y,z=echelle(freq, power, (dnu_max-dnu_min)/2., offset=0.0)
+        fig, ax = plt.subplots(figsize=[7,7])
+        line = ax.imshow(np.sqrt(z), aspect='auto', 
+                        extent=(x.min(), x.max(), y.min(), y.max()), 
+                        origin='lower',
+                        cmap=cmap,
+                        interpolation='none'
+                        )
 
-    x,y,z=echelle(freq, power, dnu, offset=0.0)
-    fig, ax = plt.subplots(figsize=[7,7])
-    line = ax.imshow(np.sqrt(z), aspect='auto', 
-                    extent=(x.min(), x.max(), y.min(), y.max()), 
-                    origin='lower',
-                    cmap='gray_r')
+        def update(dnu):
+            x,y,z=echelle(freq, power, dnu, offset=0.0)
+            line.set_array(np.sqrt(z))
+            line.set_extent((x.min(), x.max(), y.min(), y.max()))
+            ax.set_xlim(0,dnu)
+            fig.canvas.blit(ax.bbox)
+            #fig.canvas.draw()
 
-    def update(dnu):
-        x,y,z=echelle(freq, power, dnu, offset=0.0)
-        line.set_array(np.sqrt(z))
-        line.set_extent((x.min(), x.max(), y.min(), y.max()))
-        ax.set_xlim(0,dnu)
-        fig.canvas.draw()
-
-    ax.set_xlabel(u'Frequency mod \u0394\u03BD')
-    ax.set_ylabel('Frequency')
+        ax.set_xlabel(u'Frequency mod \u0394\u03BD')
+        ax.set_ylabel('Frequency')
+        
+        interact(update, dnu=(dnu_min,dnu_max,step))
     
-    interact(update, dnu=(dnu-2.,dnu+2.,0.01))
+    else:
+        x,y,z=echelle(freq, power, (dnu_max-dnu_min)/2.)
+        fig, ax = plt.subplots()
+        plt.subplots_adjust(left=0.25, bottom=0.25)
+        line = ax.imshow(np.sqrt(z), aspect='auto', 
+                        extent=(x.min(), x.max(), y.min(), y.max()), 
+                        origin='lower',
+                        cmap=cmap,
+                        interpolation='none'
+                        )
+
+        axfreq = plt.axes([0.25, 0.1, 0.65, 0.03])
+        dnu_slider = Slider(axfreq, u'\u0394\u03BD', dnu_min, dnu_max, valinit=(dnu_max-dnu_min)/2., valstep=step)
+
+        def update(dnu):
+            x,y,z=echelle(freq, power, dnu)
+            line.set_array(np.sqrt(z))
+            line.set_extent((x.min(), x.max(), y.min(), y.max()))
+            
+            ax.set_xlim(0,dnu)
+            fig.canvas.blit(ax.bbox)
+            
+        dnu_slider.on_changed(update)
+
+        ax.set_xlabel(u'Frequency mod \u0394\u03BD')
+        ax.set_ylabel('Frequency')
+        plt.show()
+
+        # This is required so the slider isn't garbage collected
+        return dnu_slider
