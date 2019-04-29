@@ -6,7 +6,7 @@ from setuptools import setup
 
 setup(
     name="echelle",
-    version='0.0.0.0.0.7',
+    version='0.0.0.0.0.8',
     author="Daniel Hey",
     url="https://github.com/danielhey/echelle",
     packages=["echelle"],

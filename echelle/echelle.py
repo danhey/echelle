@@ -10,12 +10,10 @@ from matplotlib.widgets import Slider
 
 __all__ = ["echelle", "plot_echelle", "interact_echelle"]
 
-def echelle(freq, power, dnu, offset=0.0):
+def echelle(freq, power, dnu, fmin=0., fmax=None, offset=0.0):
 
-    if len(freq) != len(power): 
-        raise ValueError("x and y must have equal size.")	
-
-    fmin, fmax = freq[0], freq[-1]
+    if fmax is None:
+        fmax = freq[-1]
 
     fmin = fmin - offset
     fmax = fmax - offset
@@ -27,7 +25,8 @@ def echelle(freq, power, dnu, offset=0.0):
         fmin = fmin - (fmin % dnu)
 
     # trim data
-    index = np.intersect1d(np.where(freq>=fmin)[0],np.where(freq<=fmax)[0])
+    index = (freq>=fmin) & (freq<=fmax)
+    #index = np.intersect1d(np.where(freq>=fmin)[0],np.where(freq<=fmax)[0])
     trimx = freq[index]
 
     samplinginterval = np.median(trimx[1:-1] - trimx[0:-2]) * 0.1
@@ -52,8 +51,8 @@ def echelle(freq, power, dnu, offset=0.0):
             z[j,:] = yp[n_element*(i):n_element*(i+1)]
     return xn, yn, z
 
-def plot_echelle(freq, power, dnu, offset=0.0,
-                 ax=None, nlevels=32, cmap='gray_r'):
+def plot_echelle(freq, power, dnu, 
+                 ax=None, nlevels=32, cmap='gray_r', **kwargs):
     """
     Plots the echelle diagram for a given amplitude (or power) spectrum
     Args:
@@ -63,7 +62,7 @@ def plot_echelle(freq, power, dnu, offset=0.0,
     offset (float): Amount by which to offset the echelle diagram
     """
 
-    echx, echy, echz = echelle(freq, power, dnu, offset=0.0,)
+    echx, echy, echz = echelle(freq, power, dnu, **kwargs)
     echz = np.sqrt(echz)
     if ax is None:
         fig, ax = plt.subplots()
@@ -79,7 +78,7 @@ def plot_echelle(freq, power, dnu, offset=0.0,
     return ax
 
 def interact_echelle(freq, power, dnu_min, dnu_max, step=0.01,
-                    cmap='gray_r', notebook=False):
+                    cmap='gray_r', notebook=False, figsize=[7,7], **kwargs):
     """
     Plots an interactive echelle diagram with a variable dnu slider.
     Args:
@@ -87,7 +86,12 @@ def interact_echelle(freq, power, dnu_min, dnu_max, step=0.01,
     power (array-like): Power or amplitude of the spectrum
     dnu_min (float): Minimum large separation
     dnu_max (float): Maximum large separation
+    step (float): Step size in slider interval
+    notebook (bool): Whether the function is running in a notebook or not
+    figsize: (arr): Figure size to be passed into plt.subplots
+    **kwargs: Keyword arguments for echelle(). Mostly fmin, fmax, and offset
     """
+
     if notebook:
         from ipywidgets import interact
         mpl_is_inline = 'nbAgg' in get_backend()
@@ -98,8 +102,8 @@ def interact_echelle(freq, power, dnu_min, dnu_max, step=0.01,
         if dnu_max < dnu_min:
             raise ValueError('Maximum range can not be less than minimum')
 
-        x,y,z=echelle(freq, power, (dnu_max-dnu_min)/2., offset=0.0)
-        fig, ax = plt.subplots(figsize=[7,7])
+        x,y,z=echelle(freq, power, (dnu_max-dnu_min)/2., **kwargs)
+        fig, ax = plt.subplots(figsize=figsize)
         line = ax.imshow(np.sqrt(z), aspect='auto', 
                         extent=(x.min(), x.max(), y.min(), y.max()), 
                         origin='lower',
@@ -108,12 +112,11 @@ def interact_echelle(freq, power, dnu_min, dnu_max, step=0.01,
                         )
 
         def update(dnu):
-            x,y,z=echelle(freq, power, dnu, offset=0.0)
+            x,y,z=echelle(freq, power, dnu, **kwargs)
             line.set_array(np.sqrt(z))
             line.set_extent((x.min(), x.max(), y.min(), y.max()))
             ax.set_xlim(0,dnu)
             fig.canvas.blit(ax.bbox)
-            #fig.canvas.draw()
 
         ax.set_xlabel(u'Frequency mod \u0394\u03BD')
         ax.set_ylabel('Frequency')
@@ -121,8 +124,8 @@ def interact_echelle(freq, power, dnu_min, dnu_max, step=0.01,
         interact(update, dnu=(dnu_min,dnu_max,step))
     
     else:
-        x,y,z=echelle(freq, power, (dnu_max-dnu_min)/2.)
-        fig, ax = plt.subplots()
+        x,y,z=echelle(freq, power, (dnu_max-dnu_min)/2., **kwargs)
+        fig, ax = plt.subplots(figsize=figsize)
         plt.subplots_adjust(left=0.25, bottom=0.25)
         line = ax.imshow(np.sqrt(z), aspect='auto', 
                         extent=(x.min(), x.max(), y.min(), y.max()), 
@@ -135,7 +138,7 @@ def interact_echelle(freq, power, dnu_min, dnu_max, step=0.01,
         dnu_slider = Slider(axfreq, u'\u0394\u03BD', dnu_min, dnu_max, valinit=(dnu_max-dnu_min)/2., valstep=step)
 
         def update(dnu):
-            x,y,z=echelle(freq, power, dnu)
+            x,y,z=echelle(freq, power, dnu, **kwargs)
             line.set_array(np.sqrt(z))
             line.set_extent((x.min(), x.max(), y.min(), y.max()))
             
