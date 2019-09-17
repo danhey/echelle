@@ -1,5 +1,7 @@
 # Echelle
 
+![](docs/echelle_plot.png)
+
 ## Installation
 `pip install echelle`
 or download the git repository and 
