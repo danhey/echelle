@@ -105,7 +105,7 @@ def plot_echelle(freq, power, dnu, ax=None, cmap='BuPu', scale='sqrt',
         The plotted echelle diagram on the axes
     """
     power = smooth(power, smooth_filter_width)
-    echx, echy, echz = echelle(freq, power, dnu, offset=offset, **kwargs)
+    echx, echy, echz = echelle(freq, power, dnu, **kwargs)
     
     if scale is 'log':
         echz = np.log10(echz)
