@@ -25,3 +25,16 @@ plot_echelle(frequency, power, dnu)
 
 See the example.ipynb for common usage!
 
+## Citing
+
+If you make use of echelle in your work, please consider citing the Zenodo listing
+```
+@misc{daniel_2019_3403407,
+  author       = {Daniel Hey},
+  title        = {danhey/echelle: Initial release},
+  month        = sep,
+  year         = 2019,
+  doi          = {10.5281/zenodo.3403407},
+  url          = {https://doi.org/10.5281/zenodo.3403407}
+}
+```
