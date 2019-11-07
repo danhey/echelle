@@ -221,6 +221,9 @@ def interact_echelle(freq, power, dnu_min, dnu_max, step=0.01,
             new_dnu = slider.val - slider.valstep
         elif event.key == 'right':
             new_dnu = slider.val + slider.valstep
+        else:
+            new_dnu = slider.val
+
         slider.set_val(new_dnu)
         update(new_dnu)   
         
