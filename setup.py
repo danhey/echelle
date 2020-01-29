@@ -13,13 +13,18 @@ if "release" in sys.argv[-1]:
 with open('requirements.txt') as f:
     install_requires = f.read().splitlines()
 
+# Load the __version__ variable without importing the package already
+exec(open("echelle/version.py").read())
+
 setup(
     name="echelle",
-    version='1.3',
+    version=__version__,
     author="Daniel Hey",
     url="https://github.com/danhey/echelle",
     packages=["echelle"],
-    description="Neat tools for echelle diagrams.",
+    description="A Python package for plotting and interacting with echelle diagrams.",
+    long_description=open("README.md").read(),
+    long_description_content_type='text/markdown',
     classifiers=[
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",

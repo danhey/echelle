@@ -1,6 +1,9 @@
 # Echelle
 
-![](docs/echelle_plot.png)
+<!-- ![](docs/echelle_plot.png) -->
+Echelle is a Python package for plotting and interacting with echelle diagrams.
+In an echelle diagram, the amplitude spectrum of a star is stacked in equal
+slices of delta nu, the large separation. 
 
 ## Installation
 `pip install echelle`
@@ -15,7 +18,7 @@ from echelle import interact_echelle
 interact_echelle(frequency, power, dnu_min, dnu_max)
 ```
 
-If you're using in a Jupyter notebook, I suggest calling `%matplotlib notebook` first.
+If you're using echelle in a Jupyter notebook, I suggest calling `%matplotlib notebook` first.
 
 To plot a non-interactive echelle diagram,
 ```
