@@ -7,9 +7,10 @@ from astropy.convolution import convolve, Box1DKernel
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
 
-__all__ = ["echelle", "plot_echelle", "interact_echelle", "plot_echelle_old"]
+__all__ = ["echelle", "plot_echelle", "interact_echelle", "smooth"]
 
-def echelle(freq, power, dnu, fmin=0., fmax=None, offset=0.0):
+
+def echelle(freq, power, dnu, fmin=0.0, fmax=None, offset=0.0):
     """Calculates the echelle diagram. Use this function if you want to do
     some more custom plotting.
     
@@ -47,32 +48,43 @@ def echelle(freq, power, dnu, fmin=0., fmax=None, offset=0.0):
         fmin = fmin - (fmin % dnu)
 
     # trim data
-    index = (freq>=fmin) & (freq<=fmax)
+    index = (freq >= fmin) & (freq <= fmax)
     trimx = freq[index]
 
-    samplinginterval = np.median(trimx[1:-1] - trimx[0:-2])# * 0.1
-    xp = np.arange(fmin,fmax+dnu,samplinginterval)
+    samplinginterval = np.median(trimx[1:-1] - trimx[0:-2])  # * 0.1
+    xp = np.arange(fmin, fmax + dnu, samplinginterval)
     yp = np.interp(xp, freq, power)
 
-    n_stack = int((fmax-fmin)/dnu)
-    n_element = int(dnu/samplinginterval)
+    n_stack = int((fmax - fmin) / dnu)
+    n_element = int(dnu / samplinginterval)
 
     morerow = 2
-    arr = np.arange(1,n_stack) * dnu
-    arr2 = np.array([arr,arr])
-    yn = np.reshape(arr2,len(arr)*2,order="F")
-    yn = np.insert(yn,0,0.0)
-    yn = np.append(yn,n_stack*dnu) + fmin + offset
+    arr = np.arange(1, n_stack) * dnu
+    arr2 = np.array([arr, arr])
+    yn = np.reshape(arr2, len(arr) * 2, order="F")
+    yn = np.insert(yn, 0, 0.0)
+    yn = np.append(yn, n_stack * dnu) + fmin + offset
 
-    xn = np.arange(1,n_element+1)/n_element * dnu
-    z = np.zeros([n_stack*morerow,n_element])
+    xn = np.arange(1, n_element + 1) / n_element * dnu
+    z = np.zeros([n_stack * morerow, n_element])
     for i in range(n_stack):
-        for j in range(i*morerow,(i+1)*morerow):
-            z[j,:] = yp[n_element*(i):n_element*(i+1)]
+        for j in range(i * morerow, (i + 1) * morerow):
+            z[j, :] = yp[n_element * (i) : n_element * (i + 1)]
     return xn, yn, z
 
-def plot_echelle(freq, power, dnu, ax=None, cmap='BuPu', scale='sqrt',
-                interpolation='none', smooth_filter_width=50, **kwargs):
+
+def plot_echelle(
+    freq,
+    power,
+    dnu,
+    ax=None,
+    cmap="BuPu",
+    scale="sqrt",
+    interpolation="none",
+    smooth=False,
+    smooth_filter_width=50,
+    **kwargs
+):
     """Plots the echelle diagram.
     
     Parameters
@@ -104,30 +116,45 @@ def plot_echelle(freq, power, dnu, ax=None, cmap='BuPu', scale='sqrt',
     matplotlib.axes._subplots.AxesSubplot
         The plotted echelle diagram on the axes
     """
-    power = smooth(power, smooth_filter_width)
+    if smooth:
+        power = smooth(power, smooth_filter_width)
     echx, echy, echz = echelle(freq, power, dnu, **kwargs)
-    
-    if scale is 'log':
+
+    if scale is "log":
         echz = np.log10(echz)
-    elif scale is 'sqrt':
+    elif scale is "sqrt":
         echz = np.sqrt(echz)
     if ax is None:
         fig, ax = plt.subplots()
-    
-    ax.imshow(echz, aspect='auto', 
-                extent=(echx.min(), echx.max(), echy.min(), echy.max()), 
-                origin='lower',
-                cmap=cmap,
-                interpolation=interpolation)
-        
-    ax.set_xlabel(r'Frequency' +' mod ' + str(dnu))
-    ax.set_ylabel(r'Frequency')
+
+    ax.imshow(
+        echz,
+        aspect="auto",
+        extent=(echx.min(), echx.max(), echy.min(), echy.max()),
+        origin="lower",
+        cmap=cmap,
+        interpolation=interpolation,
+    )
+
+    ax.set_xlabel(r"Frequency" + " mod " + str(dnu))
+    ax.set_ylabel(r"Frequency")
     return ax
 
-def interact_echelle(freq, power, dnu_min, dnu_max, step=0.01,
-                    cmap='BuPu', ax=None, interpolation='none', 
-                    smooth_filter_width=50., scale='sqrt', 
-                    return_coords=False, **kwargs):
+
+def interact_echelle(
+    freq,
+    power,
+    dnu_min,
+    dnu_max,
+    step=0.01,
+    cmap="BuPu",
+    ax=None,
+    interpolation="none",
+    smooth_filter_width=50.0,
+    scale="sqrt",
+    return_coords=False,
+    **kwargs
+):
     """Creates an interactive echelle environment with a variable deltanu 
     slider. If you're working in a Jupyter notebook/lab environment, you must
     call `%matplotlib notebook` before running this.
@@ -174,74 +201,83 @@ def interact_echelle(freq, power, dnu_min, dnu_max, step=0.01,
     """
 
     if dnu_max < dnu_min:
-        raise ValueError('Maximum range can not be less than minimum')
-    
+        raise ValueError("Maximum range can not be less than minimum")
+
     if smooth_filter_width < 1:
         raise ValueError("The smooth filter width can not be less than 1!")
-    
+
     if ax is None:
         fig, ax = plt.subplots()
-        
+
     power = smooth(power, smooth_filter_width)
 
-    x, y, z = echelle(freq, power, (dnu_max+dnu_min)/2., **kwargs)
+    x, y, z = echelle(freq, power, (dnu_max + dnu_min) / 2.0, **kwargs)
     plt.subplots_adjust(left=0.25, bottom=0.25)
-    
-    if scale is 'sqrt':
+
+    if scale is "sqrt":
         z = np.sqrt(z)
-    elif scale is 'log':
+    elif scale is "log":
         z = np.log10(z)
-        
-    line = ax.imshow(z, aspect='auto', 
-                    extent=(x.min(), x.max(), y.min(), y.max()), 
-                    origin='lower',
-                    cmap=cmap,
-                    interpolation=interpolation
-                    )
+
+    line = ax.imshow(
+        z,
+        aspect="auto",
+        extent=(x.min(), x.max(), y.min(), y.max()),
+        origin="lower",
+        cmap=cmap,
+        interpolation=interpolation,
+    )
 
     axfreq = plt.axes([0.25, 0.1, 0.65, 0.03])
-    valfmt = '%1.'+str(len(str(step).split('.')[-1]))+'f'
-    slider = Slider(axfreq, u'\u0394\u03BD', dnu_min, dnu_max, 
-                    valinit=(dnu_max+dnu_min)/2., valstep=step,
-                   valfmt = valfmt)
+    valfmt = "%1." + str(len(str(step).split(".")[-1])) + "f"
+    slider = Slider(
+        axfreq,
+        u"\u0394\u03BD",
+        dnu_min,
+        dnu_max,
+        valinit=(dnu_max + dnu_min) / 2.0,
+        valstep=step,
+        valfmt=valfmt,
+    )
 
     def update(dnu):
-        x,y,z=echelle(freq, power, dnu, **kwargs)
-        if scale is 'sqrt':
+        x, y, z = echelle(freq, power, dnu, **kwargs)
+        if scale is "sqrt":
             z = np.sqrt(z)
-        elif scale is 'log':
+        elif scale is "log":
             z = np.log10(z)
         line.set_array(z)
         line.set_extent((x.min(), x.max(), y.min(), y.max()))
         ax.set_xlim(0, dnu)
         fig.canvas.blit(ax.bbox)
-        
+
     def on_key_press(event):
-        if event.key == 'left':
+        if event.key == "left":
             new_dnu = slider.val - slider.valstep
-        elif event.key == 'right':
+        elif event.key == "right":
             new_dnu = slider.val + slider.valstep
         else:
             new_dnu = slider.val
 
         slider.set_val(new_dnu)
-        update(new_dnu)   
-        
+        update(new_dnu)
+
     def on_click(event):
         ix, iy = event.xdata, event.ydata
         coords.append((ix, iy))
-            
+
     fig.canvas.mpl_connect("key_press_event", on_key_press)
     slider.on_changed(update)
 
-    ax.set_xlabel(u'Frequency mod \u0394\u03BD')
-    ax.set_ylabel('Frequency')
+    ax.set_xlabel(u"Frequency mod \u0394\u03BD")
+    ax.set_ylabel("Frequency")
     plt.show()
 
     if return_coords:
         coords = []
-        fig.canvas.mpl_connect('button_press_event', on_click)
+        fig.canvas.mpl_connect("button_press_event", on_click)
         return coords
+
 
 def smooth(power, smooth_filter_width):
     """Smooths the input power array with a Box1DKernel from astropy
@@ -260,31 +296,48 @@ def smooth(power, smooth_filter_width):
     """
     return convolve(power, Box1DKernel(smooth_filter_width))
 
-def plot_echelle_old(freq, power, dnu, 
-                 ax=None, nlevels=32, cmap='Greys', scale='sqrt',
-                 offset=0., 
-                 xmin=None, xmax=None, 
-                 rasterized=True, **kwargs):
+
+def plot_echelle_old(
+    freq,
+    power,
+    dnu,
+    ax=None,
+    nlevels=32,
+    cmap="Greys",
+    scale="sqrt",
+    offset=0.0,
+    xmin=None,
+    xmax=None,
+    rasterized=True,
+    **kwargs
+):
     echx, echy, echz = echelle(freq, power, dnu, offset=offset, **kwargs)
     echx += offset
 
-    if scale is 'log':
+    if scale is "log":
         echz = np.log10(echz)
-    elif scale is 'sqrt':
+    elif scale is "sqrt":
         echz = np.sqrt(echz)
 
     if ax is None:
         fig, ax = plt.subplots()
 
-    levels = np.linspace(np.min(echz),np.max(echz),nlevels)
-    ax.contourf(echx,echy,echz,cmap=cmap,levels=levels, rasterized=rasterized)
+    levels = np.linspace(np.min(echz), np.max(echz), nlevels)
+    ax.contourf(echx, echy, echz, cmap=cmap, levels=levels, rasterized=rasterized)
     if xmax is not None:
-        ax.contourf(echx+dnu,echy-dnu,echz,cmap=cmap,levels=levels, rasterized=rasterized)
-        ax.axis([xmin, xmax,np.min(echy),np.max(echy)])
+        ax.contourf(
+            echx + dnu,
+            echy - dnu,
+            echz,
+            cmap=cmap,
+            levels=levels,
+            rasterized=rasterized,
+        )
+        ax.axis([xmin, xmax, np.min(echy), np.max(echy)])
     else:
-        ax.axis([np.min(echx), np.max(echx),np.min(echy),np.max(echy)])
-    
-    ax.set_xlabel(r'Frequency' +' mod ' + str(dnu))
-    ax.set_ylabel(r'Frequency')
-    
+        ax.axis([np.min(echx), np.max(echx), np.min(echy), np.max(echy)])
+
+    ax.set_xlabel(r"Frequency" + " mod " + str(dnu))
+    ax.set_ylabel(r"Frequency")
+
     return ax

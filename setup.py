@@ -1,8 +1,17 @@
 #!/usr/bin/env python
-
 import os
 import sys
 from setuptools import setup
+
+# Prepare and send a new release to PyPI
+if "release" in sys.argv[-1]:
+    os.system("python setup.py sdist")
+    os.system("twine upload dist/*")
+    os.system("rm -rf dist/echelle*")
+    sys.exit()
+
+with open('requirements.txt') as f:
+    install_requires = f.read().splitlines()
 
 setup(
     name="echelle",
@@ -17,5 +26,5 @@ setup(
         "Operating System :: OS Independent",
         "Programming Language :: Python",
     ],
-    install_requires=["numpy", "matplotlib", "astropy"],
+    install_requires=install_requires,
 )
