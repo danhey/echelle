@@ -80,8 +80,8 @@ def plot_echelle(
     mirror=False,
     ax=None,
     cmap="BuPu",
-    scale=None,#"sqrt",
-    interpolation="none",
+    scale=None,  # "sqrt",
+    interpolation=None,
     smooth=False,
     smooth_filter_width=50,
     **kwargs
@@ -142,13 +142,18 @@ def plot_echelle(
     # It's much cheaper just to replot the data we already have
     if mirror:
         ax.imshow(
-        echz,
-        aspect="auto",
-        extent=((echx.min() + dnu), (echx.max() + dnu), (echy.min() - dnu), (echy.max()) - dnu),
-        origin="lower",
-        cmap=cmap,
-        interpolation=interpolation,
-    )
+            echz,
+            aspect="auto",
+            extent=(
+                (echx.min() + dnu),
+                (echx.max() + dnu),
+                (echy.min() - dnu),
+                (echy.max()) - dnu,
+            ),
+            origin="lower",
+            cmap=cmap,
+            interpolation=interpolation,
+        )
 
     ax.set_xlabel(r"Frequency" + " mod " + str(dnu))
     ax.set_ylabel(r"Frequency")
@@ -163,10 +168,10 @@ def interact_echelle(
     step=0.01,
     cmap="BuPu",
     ax=None,
-    interpolation="none",
+    interpolation=None,
     smooth=False,
     smooth_filter_width=50.0,
-    scale=None,#"sqrt",
+    scale=None,  # "sqrt",
     return_coords=False,
     **kwargs
 ):
