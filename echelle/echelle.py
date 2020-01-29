@@ -77,9 +77,10 @@ def plot_echelle(
     freq,
     power,
     dnu,
+    mirror=False,
     ax=None,
     cmap="BuPu",
-    scale="sqrt",
+    scale=None,#"sqrt",
     interpolation="none",
     smooth=False,
     smooth_filter_width=50,
@@ -120,10 +121,12 @@ def plot_echelle(
         power = smooth(power, smooth_filter_width)
     echx, echy, echz = echelle(freq, power, dnu, **kwargs)
 
-    if scale is "log":
-        echz = np.log10(echz)
-    elif scale is "sqrt":
-        echz = np.sqrt(echz)
+    if scale is not None:
+        if scale is "log":
+            echz = np.log10(echz)
+        elif scale is "sqrt":
+            echz = np.sqrt(echz)
+
     if ax is None:
         fig, ax = plt.subplots()
 
@@ -131,6 +134,17 @@ def plot_echelle(
         echz,
         aspect="auto",
         extent=(echx.min(), echx.max(), echy.min(), echy.max()),
+        origin="lower",
+        cmap=cmap,
+        interpolation=interpolation,
+    )
+
+    # It's much cheaper just to replot the data we already have
+    if mirror:
+        ax.imshow(
+        echz,
+        aspect="auto",
+        extent=((echx.min() + dnu), (echx.max() + dnu), (echy.min() - dnu), (echy.max()) - dnu),
         origin="lower",
         cmap=cmap,
         interpolation=interpolation,
