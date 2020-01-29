@@ -118,7 +118,7 @@ def plot_echelle(
         The plotted echelle diagram on the axes
     """
     if smooth:
-        power = smooth(power, smooth_filter_width)
+        power = smooth_power(power, smooth_filter_width)
     echx, echy, echz = echelle(freq, power, dnu, **kwargs)
 
     if scale is not None:
@@ -164,8 +164,9 @@ def interact_echelle(
     cmap="BuPu",
     ax=None,
     interpolation="none",
+    smooth=False,
     smooth_filter_width=50.0,
-    scale="sqrt",
+    scale=None,#"sqrt",
     return_coords=False,
     **kwargs
 ):
@@ -222,8 +223,8 @@ def interact_echelle(
 
     if ax is None:
         fig, ax = plt.subplots()
-
-    power = smooth(power, smooth_filter_width)
+    if smooth:
+        power = smooth_power(power, smooth_filter_width)
 
     x, y, z = echelle(freq, power, (dnu_max + dnu_min) / 2.0, **kwargs)
     plt.subplots_adjust(left=0.25, bottom=0.25)
@@ -256,10 +257,11 @@ def interact_echelle(
 
     def update(dnu):
         x, y, z = echelle(freq, power, dnu, **kwargs)
-        if scale is "sqrt":
-            z = np.sqrt(z)
-        elif scale is "log":
-            z = np.log10(z)
+        if scale is not None:
+            if scale is "sqrt":
+                z = np.sqrt(z)
+            elif scale is "log":
+                z = np.log10(z)
         line.set_array(z)
         line.set_extent((x.min(), x.max(), y.min(), y.max()))
         ax.set_xlim(0, dnu)
@@ -293,7 +295,7 @@ def interact_echelle(
         return coords
 
 
-def smooth(power, smooth_filter_width):
+def smooth_power(power, smooth_filter_width):
     """Smooths the input power array with a Box1DKernel from astropy
     
     Parameters
