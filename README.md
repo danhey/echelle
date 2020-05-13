@@ -1,4 +1,5 @@
 # Echelle
+![](docs/example_echelle.gif)
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3629933.svg)](https://doi.org/10.5281/zenodo.3629933)
 
@@ -47,3 +48,5 @@ If you make use of echelle in your work, please consider citing the Zenodo listi
   url          = {https://doi.org/10.5281/zenodo.3629933}
 }
 ```
+
+Thanks to Adam Hamilton for making the echelle gif!
