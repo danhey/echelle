@@ -7,7 +7,9 @@ from astropy.convolution import convolve, Box1DKernel
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
 
-__all__ = ["echelle", "plot_echelle", "interact_echelle", "smooth"]
+from scipy.optimize import minimize
+
+__all__ = ["echelle", "plot_echelle", "interact_echelle", "smooth_power"]
 
 
 def echelle(freq, power, dnu, fmin=0.0, fmax=None, offset=0.0):
@@ -160,6 +162,37 @@ def plot_echelle(
     return ax
 
 
+def get_p_modes_asymp_freq(dnu, numax, epsp, d01, d02, alphap, fmin, fmax):
+    n = np.arange(int(fmin/dnu), int(fmax/dnu)+1, 1.)
+    f0 = dnu * (n + epsp + alphap*(n-numax/dnu)**2.)
+    f1 = dnu * (n + epsp + 0.5 + 2*d01 + alphap*(n-numax/dnu)**2.)
+    f2 = dnu * (n + epsp + 6*d02 + alphap*(n-numax/dnu)**2.)
+    return f0, f1, f2
+
+
+def get_mixed_modes_asymp_freq(dnu, numax, epsp, d01, d02, alphap, q, dpi1, epsg, fmin, fmax):
+    dpi1 *= 1e-6
+    n = np.arange(int(fmin/dnu), int(fmax/dnu)+1, 1.)
+    f0 = dnu * (n + epsp + alphap*(n-numax/dnu)**2.)
+    f2 = dnu * (n + epsp + 6*d02 + alphap*(n-numax/dnu)**2.)
+
+    def cost_func(x0):
+        cost = q*np.tan(np.pi/dpi1*(1/x0-epsg*dpi1)) - np.tan(np.pi/dnu*(x0-(epsp+0.5+2*d01+alphap*(x0-numax/dnu)**2.)*dnu))
+        return cost**2.
+    
+    # infinity points
+    k = np.arange(int(1/(fmax*dpi1)-0.5-epsg), int(1/(fmin*dpi1)-0.5-epsg), 1.)
+    f1g_inf = 1. / (k + 0.5 + epsg) / dpi1
+    f1p_inf = f0#dnu * (n + epsp + 1. + 2*d01 + alphap*(n-numax/dnu)**2.)
+    xinfs = np.sort(np.concatenate((f1g_inf, f1p_inf)))
+    x0s = (xinfs[:-1]+xinfs[1:])/2.
+    f1 = np.zeros(len(x0s))
+    for ix0, x0 in enumerate(x0s):
+        res = minimize(cost_func,x0)
+        f1[ix0] = res.x
+    return f0, np.unique(f1), f2
+
+
 def interact_echelle(
     freq,
     power,
@@ -173,6 +206,8 @@ def interact_echelle(
     smooth_filter_width=50.0,
     scale=None,  # "sqrt",
     return_coords=False,
+    p_modes_asymp=False,
+    mixed_modes_asymp=False,
     **kwargs
 ):
     """Creates an interactive echelle environment with a variable deltanu 
@@ -211,6 +246,10 @@ def interact_echelle(
         If True, this will bind mouseclick events to the interactive plot. 
         Clicking on the plot will store the values of the frequencies
         at the click event, and return them in a list object, by default False
+    p_modes_asymp: bool, optional
+        !tbd
+    mixed_modes_asymp: bool, optional
+        !tbd
     **kwargs : dict
         Dictionary of arguments to be passed to `echelle.echelle`
     
@@ -227,12 +266,12 @@ def interact_echelle(
         raise ValueError("The smooth filter width can not be less than 1!")
 
     if ax is None:
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(6,8))
     if smooth:
         power = smooth_power(power, smooth_filter_width)
 
     x, y, z = echelle(freq, power, (dnu_max + dnu_min) / 2.0, **kwargs)
-    plt.subplots_adjust(left=0.25, bottom=0.25)
+    plt.subplots_adjust(left=0.25, bottom=0.30)
 
     if scale is "sqrt":
         z = np.sqrt(z)
@@ -247,8 +286,11 @@ def interact_echelle(
         cmap=cmap,
         interpolation=interpolation,
     )
+    
+    def get_slider_axis(iParams):
+        return [0.25, 0.28-iParams*0.03, 0.65, 0.02]
 
-    axfreq = plt.axes([0.25, 0.1, 0.65, 0.03])
+    axfreq = plt.axes(get_slider_axis(1))
     valfmt = "%1." + str(len(str(step).split(".")[-1])) + "f"
     slider = Slider(
         axfreq,
@@ -272,16 +314,173 @@ def interact_echelle(
         ax.set_xlim(0, dnu)
         fig.canvas.blit(ax.bbox)
 
+    if p_modes_asymp:
+        dnu = (dnu_max + dnu_min)/2.0
+        if mixed_modes_asymp:
+            f0, f1, f2 = get_mixed_modes_asymp_freq(dnu, (np.min(freq) + np.max(freq))/2.,
+                                        0.5, -0.02, -0.005, 0.0002, 0.2, 100, 0.5,
+                                        np.min(freq), np.max(freq))
+        else:
+            f0, f1, f2 = get_p_modes_asymp_freq(dnu, (np.min(freq) + np.max(freq))/2.,
+                                            0.5, -0.02, -0.005, 0.0002, 
+                                            np.min(freq), np.max(freq))
+        f0x, f1x, f2x = f0%dnu, f1%dnu, f2%dnu
+        f0y, f1y, f2y = (f0-f0x)+dnu/2.0, (f1-f1x)+dnu/2.0, (f2-f2x)+dnu/2.0
+        scat0 = ax.scatter(f0x, f0y, marker='o', edgecolor='blue', facecolor='none')
+        scat1 = ax.scatter(f1x, f1y, marker='^', edgecolor='red', facecolor='none')
+        scat2 = ax.scatter(f2x, f2y, marker='s', edgecolor='green', facecolor='none')
+
+        slider_numax = Slider(
+            plt.axes(get_slider_axis(2)),
+            "$\\nu_{\\rm max}$",
+            np.min(freq),
+            np.max(freq),
+            valinit=(np.min(freq)+np.max(freq))/2.,
+            valstep=1.,
+            valfmt="%1.2f",
+        )
+        slider_epsp = Slider(
+            plt.axes(get_slider_axis(3)),
+            "$\\epsilon_p$",
+            0.,
+            1.,
+            valinit=0.5,
+            valstep=0.01,
+            valfmt="%1.2f",
+        )
+        slider_d01 = Slider(
+            plt.axes(get_slider_axis(4)),
+            "$d_{01}$",
+            -0.03,
+            0.03,
+            valinit=-0.005,
+            valstep=0.001,
+            valfmt="%1.4f",
+        )
+        slider_d02 = Slider(
+            plt.axes(get_slider_axis(5)),
+            "$d_{02}$",
+            -0.03,
+            0.,
+            valinit=-0.02,
+            valstep=0.001,
+            valfmt="%1.4f",
+        )
+        slider_alphap = Slider(
+            plt.axes(get_slider_axis(6)),
+            "$\\alpha_p$",
+            0.,
+            0.005,
+            valinit=0.0002,
+            valstep=0.0001,
+            valfmt="%1.4f",
+        )
+        if mixed_modes_asymp:
+            slider_q = Slider(
+                plt.axes(get_slider_axis(7)),
+                "$q$",
+                0.,
+                1.0,
+                valinit=0.2,
+                valstep=0.01,
+                valfmt="%1.4f",
+            )
+            slider_dpi1 = Slider(
+                plt.axes(get_slider_axis(8)),
+                "$\\Delta\\Pi_1$",
+                20,
+                500,
+                valinit=100,
+                valstep=1,
+                valfmt="%4.0f",
+            )
+            slider_epsg = Slider(
+                plt.axes(get_slider_axis(9)),
+                "$\\epsilon_g$",
+                0.,
+                1.0,
+                valinit=0.5,
+                valstep=0.01,
+                valfmt="%1.4f",
+            )
+
+        def update_asymp(vals):
+            dnu, numax, epsp = slider.val, slider_numax.val, slider_epsp.val
+            d01, d02, alphap = slider_d01.val, slider_d02.val, slider_alphap.val
+            if mixed_modes_asymp:
+                q, dpi1, epsg = slider_q.val, slider_dpi1.val, slider_epsg.val
+                f0, f1, f2 = get_mixed_modes_asymp_freq(dnu, numax, epsp, d01, d02, alphap, q, dpi1, epsg, np.min(freq), np.max(freq))
+            else:
+                f0, f1, f2 = get_p_modes_asymp_freq(dnu, numax, epsp, d01, d02, alphap, np.min(freq), np.max(freq))
+            x, y, z = echelle(freq, power, dnu, **kwargs)
+            if scale is not None:
+                if scale is "sqrt":
+                    z = np.sqrt(z)
+                elif scale is "log":
+                    z = np.log10(z)
+            line.set_array(z)
+            line.set_extent((x.min(), x.max(), y.min(), y.max()))
+            f0x, f1x, f2x = f0%dnu, f1%dnu, f2%dnu
+            f0y, f1y, f2y = (f0-f0x)+dnu/2.0, (f1-f1x)+dnu/2.0, (f2-f2x)+dnu/2.0
+            scat0.set_offsets(np.vstack((f0x, f0y)).T)
+            scat1.set_offsets(np.vstack((f1x, f1y)).T)
+            scat2.set_offsets(np.vstack((f2x, f2y)).T)
+            ax.set_xlim(0, dnu)
+            fig.canvas.blit(ax.bbox)
+
+
     def on_key_press(event):
         if event.key == "left":
             new_dnu = slider.val - slider.valstep
+            if p_modes_asymp:
+                new_numax = slider_numax.val - slider_numax.valstep
+                new_epsp = slider_epsp.val - slider_epsp.valstep
+                new_d01 = slider_d01.val - slider_d01.valstep
+                new_d02 = slider_d02.val - slider_d02.valstep
+                new_alphap = slider_alphap.val - slider_alphap.valstep
+                if mixed_modes_asymp:
+                    new_q = slider_q.val - slider_q.valstep
+                    new_dpi1 = slider_dpi1.val - slider_dpi1.valstep
+                    new_epsg = slider_epsg.val - slider_epsg.valstep
         elif event.key == "right":
             new_dnu = slider.val + slider.valstep
+            if p_modes_asymp:
+                new_numax = slider_numax.val + slider_numax.valstep
+                new_epsp = slider_epsp.val + slider_epsp.valstep
+                new_d01 = slider_d01.val + slider_d01.valstep
+                new_d02 = slider_d02.val + slider_d02.valstep
+                new_alphap = slider_alphap.val + slider_alphap.valstep
+                if mixed_modes_asymp:
+                    new_q = slider_q.val + slider_q.valstep
+                    new_dpi1 = slider_dpi1.val + slider_dpi1.valstep
+                    new_epsg = slider_epsg.val + slider_epsg.valstep
         else:
             new_dnu = slider.val
+            if p_modes_asymp:
+                new_numax = slider_numax.val 
+                new_epsp = slider_epsp.val
+                new_d01 = slider_d01.val
+                new_d02 = slider_d02.val
+                new_alphap = slider_alphap.val
+                if mixed_modes_asymp:
+                    new_q = slider_q.val
+                    new_dpi1 = slider_dpi1.val
+                    new_epsg = slider_epsg.val
 
         slider.set_val(new_dnu)
-        update(new_dnu)
+        slider_numax.set_val(new_numax)
+        slider_epsp.set_val(new_epsp)
+        slider_d01.set_val(new_d01)
+        slider_d02.set_val(new_d02)
+        slider_alphap.set_val(new_alphap)
+        if mixed_modes_asymp:
+            slider_q.set_val(new_q)
+            slider_dpi1.set_val(new_dpi1)
+            slider_epsg.set_val(new_epsg)
+        if p_modes_asymp | mixed_modes_asymp :
+            update_asymp(new_dnu)
+        else:
+            update(new_dnu)
 
     def on_click(event):
         ix, iy = event.xdata, event.ydata
@@ -289,6 +488,17 @@ def interact_echelle(
 
     fig.canvas.mpl_connect("key_press_event", on_key_press)
     slider.on_changed(update)
+
+    if p_modes_asymp:
+        slider_numax.on_changed(update_asymp)
+        slider_epsp.on_changed(update_asymp)
+        slider_d01.on_changed(update_asymp)
+        slider_d02.on_changed(update_asymp)
+        slider_alphap.on_changed(update_asymp)
+        if mixed_modes_asymp:
+            slider_q.on_changed(update_asymp)
+            slider_dpi1.on_changed(update_asymp)
+            slider_epsg.on_changed(update_asymp)
 
     ax.set_xlabel(u"Frequency mod \u0394\u03BD")
     ax.set_ylabel("Frequency")
