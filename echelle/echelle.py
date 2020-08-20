@@ -177,18 +177,18 @@ def get_mixed_modes_asymp_freq(dnu, numax, epsp, d01, d02, alphap, q, dpi1, epsg
     f2 = dnu * (n + epsp + 6*d02 + alphap*(n-numax/dnu)**2.)
 
     def cost_func(x0):
-        cost = q*np.tan(np.pi/dpi1*(1/x0-epsg*dpi1)) - np.tan(np.pi/dnu*(x0-(epsp+0.5+2*d01+alphap*(x0-numax/dnu)**2.)*dnu))
+        cost = q*np.tan(np.pi/dpi1*(1/x0-epsg*dpi1)) - np.tan(np.pi/dnu*(x0-(epsp+0.5+2*d01)*dnu))
         return cost**2.
     
     # infinity points
     k = np.arange(int(1/(fmax*dpi1)-0.5-epsg), int(1/(fmin*dpi1)-0.5-epsg), 1.)
     f1g_inf = 1. / (k + 0.5 + epsg) / dpi1
-    f1p_inf = f0#dnu * (n + epsp + 1. + 2*d01 + alphap*(n-numax/dnu)**2.)
+    f1p_inf = dnu * (n + epsp)
     xinfs = np.sort(np.concatenate((f1g_inf, f1p_inf)))
     x0s = (xinfs[:-1]+xinfs[1:])/2.
     f1 = np.zeros(len(x0s))
     for ix0, x0 in enumerate(x0s):
-        res = minimize(cost_func,x0)
+        res = minimize(cost_func, x0, bounds=[(xinfs[ix0], xinfs[ix0+1])])
         f1[ix0] = res.x
     return f0, np.unique(f1), f2
 
@@ -388,11 +388,11 @@ def interact_echelle(
             slider_dpi1 = Slider(
                 plt.axes(get_slider_axis(8)),
                 "$\\Delta\\Pi_1$",
-                20,
-                500,
+                40,
+                100,
                 valinit=100,
-                valstep=1,
-                valfmt="%4.0f",
+                valstep=0.1,
+                valfmt="%4.1f",
             )
             slider_epsg = Slider(
                 plt.axes(get_slider_axis(9)),
