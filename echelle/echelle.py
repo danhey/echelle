@@ -12,7 +12,7 @@ from scipy.optimize import minimize
 __all__ = ["echelle", "plot_echelle", "interact_echelle", "smooth_power"]
 
 
-def echelle(freq, power, dnu, fmin=0.0, fmax=None, offset=0.0):
+def echelle(freq, power, dnu, fmin=0.0, fmax=None, offset=0.0, replicated=False):
     """Calculates the echelle diagram. Use this function if you want to do
     some more custom plotting.
     
@@ -31,6 +31,7 @@ def echelle(freq, power, dnu, fmin=0.0, fmax=None, offset=0.0):
         will default to the maximum frequency passed in `freq`, by default None
     offset : float, optional
         An offset to apply to the echelle diagram, by default 0.0
+    replicated : bool, optional
     
     Returns
     -------
@@ -67,12 +68,20 @@ def echelle(freq, power, dnu, fmin=0.0, fmax=None, offset=0.0):
     yn = np.insert(yn, 0, 0.0)
     yn = np.append(yn, n_stack * dnu) + fmin + offset
 
-    xn = np.arange(1, n_element + 1) / n_element * dnu
-    z = np.zeros([n_stack * morerow, n_element])
-    for i in range(n_stack):
-        for j in range(i * morerow, (i + 1) * morerow):
-            z[j, :] = yp[n_element * (i) : n_element * (i + 1)]
-    return xn, yn, z
+    if not replicated:
+        xn = np.arange(1, n_element + 1) / n_element * dnu
+        z = np.zeros([n_stack * morerow, n_element])
+        for i in range(n_stack):
+            for j in range(i * morerow, (i + 1) * morerow):
+                z[j, :] = yp[n_element * (i) : n_element * (i + 1)]
+        return xn, yn, z
+    else:
+        xn = np.arange(1, 2 * n_element + 1) / n_element * dnu
+        z = np.zeros([n_stack * morerow, 2 * n_element])
+        for i in range(n_stack):
+            for j in range(i * morerow, (i + 1) * morerow):
+                z[j, :] = np.concatenate([yp[n_element * (i) : n_element * (i + 1)], yp[n_element * (i + 1) : n_element * (i + 2)] ])
+        return xn, yn, z
 
 
 def plot_echelle(
@@ -208,6 +217,9 @@ def interact_echelle(
     return_coords=False,
     p_modes_asymp=False,
     mixed_modes_asymp=False,
+    replicated=False,
+    dpi_min=None,
+    dpi_max=None,
     **kwargs
 ):
     """Creates an interactive echelle environment with a variable deltanu 
@@ -250,6 +262,8 @@ def interact_echelle(
         !tbd
     mixed_modes_asymp: bool, optional
         !tbd
+    replicated: bool, optional
+
     **kwargs : dict
         Dictionary of arguments to be passed to `echelle.echelle`
     
@@ -266,11 +280,11 @@ def interact_echelle(
         raise ValueError("The smooth filter width can not be less than 1!")
 
     if ax is None:
-        fig, ax = plt.subplots(figsize=(6,8))
+        fig, ax = plt.subplots(figsize=(12,8))
     if smooth:
         power = smooth_power(power, smooth_filter_width)
 
-    x, y, z = echelle(freq, power, (dnu_max + dnu_min) / 2.0, **kwargs)
+    x, y, z = echelle(freq, power, (dnu_max + dnu_min) / 2.0, replicated=replicated, **kwargs)
     plt.subplots_adjust(left=0.25, bottom=0.30)
 
     if scale is "sqrt":
@@ -303,7 +317,7 @@ def interact_echelle(
     )
 
     def update(dnu):
-        x, y, z = echelle(freq, power, dnu, **kwargs)
+        x, y, z = echelle(freq, power, dnu, replicated=replicated, **kwargs)
         if scale is not None:
             if scale is "sqrt":
                 z = np.sqrt(z)
@@ -311,7 +325,10 @@ def interact_echelle(
                 z = np.log10(z)
         line.set_array(z)
         line.set_extent((x.min(), x.max(), y.min(), y.max()))
-        ax.set_xlim(0, dnu)
+        if not replicated:
+            ax.set_xlim(0, dnu)
+        else:
+            ax.set_xlim(0, 2*dnu)
         fig.canvas.blit(ax.bbox)
 
     if p_modes_asymp:
@@ -326,6 +343,10 @@ def interact_echelle(
                                             np.min(freq), np.max(freq))
         f0x, f1x, f2x = f0%dnu, f1%dnu, f2%dnu
         f0y, f1y, f2y = (f0-f0x)+dnu/2.0, (f1-f1x)+dnu/2.0, (f2-f2x)+dnu/2.0
+        if replicated:
+                f0x, f0y = np.concatenate([f0x, f0x+dnu]), np.concatenate([f0y, f0y-dnu])
+                f1x, f1y = np.concatenate([f1x, f1x+dnu]), np.concatenate([f1y, f1y-dnu])
+                f2x, f2y = np.concatenate([f2x, f2x+dnu]), np.concatenate([f2y, f2y-dnu])
         scat0 = ax.scatter(f0x, f0y, marker='o', edgecolor='blue', facecolor='none')
         scat1 = ax.scatter(f1x, f1y, marker='^', edgecolor='red', facecolor='none')
         scat2 = ax.scatter(f2x, f2y, marker='s', edgecolor='green', facecolor='none')
@@ -385,12 +406,15 @@ def interact_echelle(
                 valstep=0.01,
                 valfmt="%1.4f",
             )
+
+            dpi_min = 20 if dpi_min is None else dpi_min
+            dpi_max = 250 if dpi_max is None else dpi_max
             slider_dpi1 = Slider(
                 plt.axes(get_slider_axis(8)),
                 "$\\Delta\\Pi_1$",
-                40,
-                100,
-                valinit=100,
+                dpi_min,
+                dpi_max,
+                valinit=(dpi_min+dpi_max)/2.,
                 valstep=0.1,
                 valfmt="%4.1f",
             )
@@ -412,7 +436,7 @@ def interact_echelle(
                 f0, f1, f2 = get_mixed_modes_asymp_freq(dnu, numax, epsp, d01, d02, alphap, q, dpi1, epsg, np.min(freq), np.max(freq))
             else:
                 f0, f1, f2 = get_p_modes_asymp_freq(dnu, numax, epsp, d01, d02, alphap, np.min(freq), np.max(freq))
-            x, y, z = echelle(freq, power, dnu, **kwargs)
+            x, y, z = echelle(freq, power, dnu, replicated=replicated, **kwargs)
             if scale is not None:
                 if scale is "sqrt":
                     z = np.sqrt(z)
@@ -422,10 +446,19 @@ def interact_echelle(
             line.set_extent((x.min(), x.max(), y.min(), y.max()))
             f0x, f1x, f2x = f0%dnu, f1%dnu, f2%dnu
             f0y, f1y, f2y = (f0-f0x)+dnu/2.0, (f1-f1x)+dnu/2.0, (f2-f2x)+dnu/2.0
-            scat0.set_offsets(np.vstack((f0x, f0y)).T)
-            scat1.set_offsets(np.vstack((f1x, f1y)).T)
-            scat2.set_offsets(np.vstack((f2x, f2y)).T)
-            ax.set_xlim(0, dnu)
+            if not replicated:
+                scat0.set_offsets(np.vstack((f0x, f0y)).T)
+                scat1.set_offsets(np.vstack((f1x, f1y)).T)
+                scat2.set_offsets(np.vstack((f2x, f2y)).T)
+                ax.set_xlim(0, dnu)
+            else:
+                f0x, f0y = np.concatenate([f0x, f0x+dnu]), np.concatenate([f0y, f0y-dnu])
+                f1x, f1y = np.concatenate([f1x, f1x+dnu]), np.concatenate([f1y, f1y-dnu])
+                f2x, f2y = np.concatenate([f2x, f2x+dnu]), np.concatenate([f2y, f2y-dnu])
+                scat0.set_offsets(np.vstack((f0x, f0y)).T)
+                scat1.set_offsets(np.vstack((f1x, f1y)).T)
+                scat2.set_offsets(np.vstack((f2x, f2y)).T)
+                ax.set_xlim(0, 2*dnu)
             fig.canvas.blit(ax.bbox)
 
 
