@@ -7,10 +7,10 @@ from astropy.convolution import convolve, Box1DKernel
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
 
-__all__ = ["echelle", "plot_echelle", "interact_echelle", "smooth"]
+__all__ = ["echelle", "plot_echelle", "interact_echelle", "smooth_power"]
 
 
-def echelle(freq, power, dnu, fmin=0.0, fmax=None, offset=0.0):
+def echelle(freq, power, dnu, fmin=0.0, fmax=None, offset=0.0, sampling=0.1):
     """Calculates the echelle diagram. Use this function if you want to do
     some more custom plotting.
     
@@ -51,7 +51,7 @@ def echelle(freq, power, dnu, fmin=0.0, fmax=None, offset=0.0):
     index = (freq >= fmin) & (freq <= fmax)
     trimx = freq[index]
 
-    samplinginterval = np.median(trimx[1:-1] - trimx[0:-2])  # * 0.1
+    samplinginterval = np.median(trimx[1:-1] - trimx[0:-2]) * sampling
     xp = np.arange(fmin, fmax + dnu, samplinginterval)
     yp = np.interp(xp, freq, power)
 
@@ -231,7 +231,7 @@ def interact_echelle(
     if smooth:
         power = smooth_power(power, smooth_filter_width)
 
-    x, y, z = echelle(freq, power, (dnu_max + dnu_min) / 2.0, **kwargs)
+    x, y, z = echelle(freq, power, (dnu_max + dnu_min) / 2.0, sampling=1, **kwargs)
     plt.subplots_adjust(left=0.25, bottom=0.25)
 
     if scale is "sqrt":
