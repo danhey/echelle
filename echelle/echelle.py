@@ -13,7 +13,7 @@ __all__ = ["echelle", "plot_echelle", "interact_echelle", "smooth_power"]
 def echelle(freq, power, dnu, fmin=0.0, fmax=None, offset=0.0, sampling=0.1):
     """Calculates the echelle diagram. Use this function if you want to do
     some more custom plotting.
-    
+
     Parameters
     ----------
     freq : array-like
@@ -25,11 +25,11 @@ def echelle(freq, power, dnu, fmin=0.0, fmax=None, offset=0.0, sampling=0.1):
     fmin : float, optional
         Minimum frequency to calculate the echelle at, by default 0.
     fmax : float, optional
-        Maximum frequency to calculate the echelle at. If none is supplied, 
+        Maximum frequency to calculate the echelle at. If none is supplied,
         will default to the maximum frequency passed in `freq`, by default None
     offset : float, optional
         An offset to apply to the echelle diagram, by default 0.0
-    
+
     Returns
     -------
     array-like
@@ -87,7 +87,7 @@ def plot_echelle(
     **kwargs
 ):
     """Plots the echelle diagram.
-    
+
     Parameters
     ----------
     freq : numpy array
@@ -102,10 +102,10 @@ def plot_echelle(
     cmap : str, optional
         A matplotlib colormap, by default 'BuPu'
     scale : str, optional
-        either 'sqrt' or 'log' or None. Scales the echelle to bring out more 
+        either 'sqrt' or 'log' or None. Scales the echelle to bring out more
         features, by default 'sqrt'
     interpolation : str, optional
-        Type of interpolation to perform on the echelle diagram through 
+        Type of interpolation to perform on the echelle diagram through
         matplotlib.pyplot.imshow, by default 'none'
     smooth_filter_width : float, optional
         Amount by which to smooth the power values, using a Box1DKernel
@@ -173,12 +173,14 @@ def interact_echelle(
     smooth_filter_width=50.0,
     scale=None,  # "sqrt",
     return_coords=False,
+    backend="matplotlib",
+    notebook_url="localhost:8888",
     **kwargs
 ):
-    """Creates an interactive echelle environment with a variable deltanu 
+    """Creates an interactive echelle environment with a variable deltanu
     slider. If you're working in a Jupyter notebook/lab environment, you must
     call `%matplotlib notebook` before running this.
-    
+
     Parameters
     ----------
     freq : np.array
@@ -190,30 +192,30 @@ def interact_echelle(
     dnu_max : float
         Maximum deltanu value for the slider
     step : float, optional
-        Step size by which to increment or decrement the slider, by default 
+        Step size by which to increment or decrement the slider, by default
         0.01
     cmap : matplotlib.colormap, optional
         Colormap for the echelle diagram, by default 'BuPu'
     ax : matplotlib.axis, optional
-        axis object on which to plot. If none is passed, one will be created, 
+        axis object on which to plot. If none is passed, one will be created,
         by default None
     interpolation : str, optional
-        Type of interpolation to perform on the echelle diagram through 
-        matplotlib.pyplot.imshow. This is very expensive in an interactive 
+        Type of interpolation to perform on the echelle diagram through
+        matplotlib.pyplot.imshow. This is very expensive in an interactive
         environment, so use with caution, by default 'none'
     smooth_filter_width : float, optional
         Size of the Box1DKernel which is convolved with the power to smooth the
         spectrum. 1 performs no smoothing, by default 50.
     scale : str, optional
-        either 'sqrt' or 'log' or None. Scales the echelle to bring out more 
+        either 'sqrt' or 'log' or None. Scales the echelle to bring out more
         features, by default 'sqrt'
     return_coords : bool, optional
-        If True, this will bind mouseclick events to the interactive plot. 
+        If True, this will bind mouseclick events to the interactive plot.
         Clicking on the plot will store the values of the frequencies
         at the click event, and return them in a list object, by default False
     **kwargs : dict
         Dictionary of arguments to be passed to `echelle.echelle`
-    
+
     Returns
     -------
     list
@@ -226,90 +228,190 @@ def interact_echelle(
     if smooth_filter_width < 1:
         raise ValueError("The smooth filter width can not be less than 1!")
 
-    if ax is None:
-        fig, ax = plt.subplots()
     if smooth:
         power = smooth_power(power, smooth_filter_width)
 
     x, y, z = echelle(freq, power, (dnu_max + dnu_min) / 2.0, sampling=1, **kwargs)
-    plt.subplots_adjust(left=0.25, bottom=0.25)
 
     if scale is "sqrt":
         z = np.sqrt(z)
     elif scale is "log":
         z = np.log10(z)
 
-    line = ax.imshow(
-        z,
-        aspect="auto",
-        extent=(x.min(), x.max(), y.min(), y.max()),
-        origin="lower",
-        cmap=cmap,
-        interpolation=interpolation,
-    )
+    if backend == "matplotlib":
+        if ax is None:
+            fig, ax = plt.subplots()
 
-    axfreq = plt.axes([0.25, 0.1, 0.65, 0.03])
-    valfmt = "%1." + str(len(str(step).split(".")[-1])) + "f"
-    slider = Slider(
-        axfreq,
-        u"\u0394\u03BD",
-        dnu_min,
-        dnu_max,
-        valinit=(dnu_max + dnu_min) / 2.0,
-        valstep=step,
-        valfmt=valfmt,
-    )
+        plt.subplots_adjust(left=0.25, bottom=0.25)
 
-    def update(dnu):
-        x, y, z = echelle(freq, power, dnu, **kwargs)
-        if scale is not None:
-            if scale is "sqrt":
-                z = np.sqrt(z)
-            elif scale is "log":
-                z = np.log10(z)
-        line.set_array(z)
-        line.set_extent((x.min(), x.max(), y.min(), y.max()))
-        ax.set_xlim(0, dnu)
-        fig.canvas.blit(ax.bbox)
+        line = ax.imshow(
+            z,
+            aspect="auto",
+            extent=(x.min(), x.max(), y.min(), y.max()),
+            origin="lower",
+            cmap=cmap,
+            interpolation=interpolation,
+        )
 
-    def on_key_press(event):
-        if event.key == "left":
-            new_dnu = slider.val - slider.valstep
-        elif event.key == "right":
-            new_dnu = slider.val + slider.valstep
-        else:
-            new_dnu = slider.val
+        axfreq = plt.axes([0.25, 0.1, 0.65, 0.03])
+        valfmt = "%1." + str(len(str(step).split(".")[-1])) + "f"
+        slider = Slider(
+            axfreq,
+            u"\u0394\u03BD",
+            dnu_min,
+            dnu_max,
+            valinit=(dnu_max + dnu_min) / 2.0,
+            valstep=step,
+            valfmt=valfmt,
+        )
 
-        slider.set_val(new_dnu)
-        update(new_dnu)
+        def update(dnu):
+            x, y, z = echelle(freq, power, dnu, **kwargs)
+            if scale is not None:
+                if scale is "sqrt":
+                    z = np.sqrt(z)
+                elif scale is "log":
+                    z = np.log10(z)
+            line.set_array(z)
+            line.set_extent((x.min(), x.max(), y.min(), y.max()))
+            ax.set_xlim(0, dnu)
+            fig.canvas.blit(ax.bbox)
 
-    def on_click(event):
-        ix, iy = event.xdata, event.ydata
-        coords.append((ix, iy))
+        def on_key_press(event):
+            if event.key == "left":
+                new_dnu = slider.val - slider.valstep
+            elif event.key == "right":
+                new_dnu = slider.val + slider.valstep
+            else:
+                new_dnu = slider.val
 
-    fig.canvas.mpl_connect("key_press_event", on_key_press)
-    slider.on_changed(update)
+            slider.set_val(new_dnu)
+            update(new_dnu)
 
-    ax.set_xlabel(u"Frequency mod \u0394\u03BD")
-    ax.set_ylabel("Frequency")
-    plt.show()
+        def on_click(event):
+            ix, iy = event.xdata, event.ydata
+            coords.append((ix, iy))
 
-    if return_coords:
-        coords = []
-        fig.canvas.mpl_connect("button_press_event", on_click)
-        return coords
+        fig.canvas.mpl_connect("key_press_event", on_key_press)
+        slider.on_changed(update)
+
+        ax.set_xlabel(u"Frequency mod \u0394\u03BD")
+        ax.set_ylabel("Frequency")
+        plt.show()
+
+        if return_coords:
+            coords = []
+            fig.canvas.mpl_connect("button_press_event", on_click)
+            return coords
+
+    elif backend == "bokeh":
+        try:
+            import bokeh
+        except:
+            raise ImportError("Bokeh is definitely required for this.")
+
+        from bokeh.io import show, output_notebook, push_notebook
+        from bokeh.plotting import figure, ColumnDataSource
+        from bokeh.palettes import grey
+        from bokeh.layouts import column
+        from bokeh.models import CustomJS, ColumnDataSource, Slider
+
+        import warnings
+        from bokeh.util.warnings import BokehUserWarning
+
+        # This is a terrible hack and I hate Bokeh
+        warnings.simplefilter("ignore", BokehUserWarning)
+
+        from notebook import notebookapp
+
+        servers = list(notebookapp.list_running_servers())
+        ports = [s["port"] for s in servers]
+        if len(np.unique(ports)) > 1:
+            warnings.warn(
+                "You have multiple Jupyter servers open. \
+            You will need to pass the current notebook to `notebook_url`. \
+            i.e. interact_echelle(x,x,notebook_url='http://localhost:8888')",
+                UserWarning,
+            )
+
+        def create_interact_ui(doc):
+
+            source = ColumnDataSource(
+                data={
+                    "image": [z],
+                    "x": x,
+                    "y": y,
+                    "dw": [x.max() - x.min()],
+                    "dh": [y.max() - y.min()],
+                }
+            )
+
+            plot = figure(x_range=(x.min(), x.max()), y_range=(y.min(), y.max()))
+
+            cmap = grey(256)[::-1]
+
+            full_plot = plot.image(
+                image="image",
+                x="x",
+                y="y",
+                dw="dw",
+                dh=y.max() - y.min(),
+                source=source,
+                palette=cmap,
+            )
+
+            plot.xaxis.axis_label = u"Frequency mod \u0394\u03BD"
+            plot.yaxis.axis_label = "Frequency"
+
+            slider = Slider(
+                start=dnu_min,
+                end=dnu_max,
+                value=(dnu_min + dnu_max) / 2,
+                step=step,
+                title=u"\u0394\u03BD",
+            )
+
+            # Slider callback
+            def update_upon_dnu_change(attr, old, new):
+                x, y, z = echelle(
+                    freq,
+                    power,
+                    new,
+                    sampling=1,
+                )
+                if scale is not None:
+                    if scale is "sqrt":
+                        z = np.sqrt(z)
+                    elif scale is "log":
+                        z = np.log10(z)
+                full_plot.data_source.data["image"] = [z]
+                full_plot.data_source.data["dw"] = [x.max() - x.min()]
+                plot.x_range.start = x.min()
+                plot.x_range.end = x.max()
+
+            slider.on_change("value", update_upon_dnu_change)
+
+            # Layout all of the plots
+            widgets_and_figures = column(slider, plot)
+            doc.add_root(widgets_and_figures)
+
+        output_notebook(verbose=False, hide_banner=True)
+        return show(create_interact_ui, notebook_url=notebook_url)
+
+    else:
+        pass
 
 
 def smooth_power(power, smooth_filter_width):
     """Smooths the input power array with a Box1DKernel from astropy
-    
+
     Parameters
     ----------
     power : array-like
         Array of power values
     smooth_filter_width : float
         filter width
-    
+
     Returns
     -------
     array-like
