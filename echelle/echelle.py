@@ -266,7 +266,7 @@ def interact_echelle(
         )
 
         def update(dnu):
-            x, y, z = echelle(freq, power, dnu, **kwargs)
+            x, y, z = echelle(freq, power, dnu, sampling=1, **kwargs)
             if scale is not None:
                 if scale is "sqrt":
                     z = np.sqrt(z)
@@ -314,7 +314,8 @@ def interact_echelle(
         from bokeh.plotting import figure, ColumnDataSource
         from bokeh.palettes import grey
         from bokeh.layouts import column
-        from bokeh.models import CustomJS, ColumnDataSource, Slider
+        from bokeh.models import CustomJS, ColumnDataSource
+        from bokeh.models import Slider as b_Slider
 
         import warnings
         from bokeh.util.warnings import BokehUserWarning
@@ -363,7 +364,7 @@ def interact_echelle(
             plot.xaxis.axis_label = u"Frequency mod \u0394\u03BD"
             plot.yaxis.axis_label = "Frequency"
 
-            slider = Slider(
+            slider = b_Slider(
                 start=dnu_min,
                 end=dnu_max,
                 value=(dnu_min + dnu_max) / 2,
