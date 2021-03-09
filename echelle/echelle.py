@@ -331,7 +331,7 @@ def interact_echelle(
             warnings.warn(
                 "You have multiple Jupyter servers open. \
             You will need to pass the current notebook to `notebook_url`. \
-            i.e. interact_echelle(x,x,notebook_url='http://localhost:8888')",
+            i.e. interact_echelle(x,y,notebook_url='http://localhost:8888')",
                 UserWarning,
             )
 
@@ -400,7 +400,7 @@ def interact_echelle(
         return show(create_interact_ui, notebook_url=notebook_url)
 
     else:
-        pass
+        raise ValueError("'backend' must be either 'matplotlib' or 'bokeh")
 
 
 def smooth_power(power, smooth_filter_width):
