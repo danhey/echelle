@@ -1,8 +1,10 @@
 Installation
 ============
 
-From Pip
------------
+Using pip
+---------
+
+Pip is the recommended method of installing *echelle*.
 
 .. code-block:: bash
 
@@ -17,5 +19,9 @@ From Source
     cd echelle
     python setup.py install
 
+Requirements
+------------
+
+By default, *echelle* requires `Bokeh` and `matplotlib` to be installed.
 
     
