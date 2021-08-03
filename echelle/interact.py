@@ -97,6 +97,8 @@ def interact_echelle(
         # if the user is working from the terminal.
         if ax is None:
             fig, ax = plt.subplots()
+        else:
+            fig = plt.gcf()
 
         plt.subplots_adjust(left=0.25, bottom=0.25)
 
