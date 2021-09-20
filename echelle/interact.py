@@ -18,13 +18,14 @@ def interact_echelle(
     step=None,
     cmap="BuPu",
     ax=None,
-    interpolation=None,
     smooth=False,
     smooth_filter_width=50.0,
-    scale=None,  # "sqrt",
+    scale=None,
     return_coords=False,
     backend="bokeh",
     notebook_url="localhost:8888",
+    plot_method='fast',
+    sampling=2,
     **kwargs
 ):
     """Creates an interactive echelle environment with a variable deltanu
@@ -49,10 +50,6 @@ def interact_echelle(
     ax : matplotlib.axis, optional
         axis object on which to plot. If none is passed, one will be created,
         by default None
-    interpolation : str, optional
-        Type of interpolation to perform on the echelle diagram through
-        matplotlib.pyplot.imshow. This is very expensive in an interactive
-        environment, so use with caution, by default 'none'
     smooth_filter_width : float, optional
         Size of the Box1DKernel which is convolved with the power to smooth the
         spectrum. 1 performs no smoothing, by default 50.
@@ -63,6 +60,11 @@ def interact_echelle(
         If True, this will bind mouseclick events to the interactive plot.
         Clicking on the plot will store the values of the frequencies
         at the click event, and return them in a list object, by default False
+    plot_method : str, 'fast' or 'slow'
+        Uses either the fast `pcolormesh` function, or the slower `imshow`
+        function. pcolormesh is much faster, but does not support
+        interpolation.
+    sampling: float
     **kwargs : dict
         Dictionary of arguments to be passed to `echelle.echelle`
 
@@ -81,7 +83,7 @@ def interact_echelle(
     if smooth:
         power = smooth_power(power, smooth_filter_width)
 
-    x, y, z = echelle(freq, power, (dnu_max + dnu_min) / 2.0, sampling=1, **kwargs)
+    x, y, z = echelle(freq, power, (dnu_max + dnu_min) / 2.0, sampling=sampling, **kwargs)
 
     if scale is "sqrt":
         z = np.sqrt(z)
@@ -89,30 +91,33 @@ def interact_echelle(
         z = np.log10(z)
 
     if step is None:
-        step = np.median(np.diff(freq))
-
+        step = 5*np.median(np.diff(freq))
     if backend == "matplotlib":
         # Create the matplotlib version of the interactive
         # form. This should only really be done
         # if the user is working from the terminal.
         if ax is None:
-            fig, ax = plt.subplots()
+            fig, ax = plt.subplots(figsize=[6.4, 9])
         else:
             fig = plt.gcf()
-
-        plt.subplots_adjust(left=0.25, bottom=0.25)
-
-        line = ax.imshow(
-            z,
-            aspect="auto",
-            extent=(x.min(), x.max(), y.min(), y.max()),
-            origin="lower",
-            cmap=cmap,
-            interpolation=interpolation,
-        )
-
-        axfreq = plt.axes([0.25, 0.1, 0.65, 0.03])
+        
+        if plot_method is 'fast':
+            line = ax.pcolorfast((x.min(), x.max()),
+                                (y.min(), y.max()), 
+                                z, 
+                                cmap=cmap)
+        else:
+            line = ax.imshow(
+                z,
+                aspect="auto",
+                extent=(x.min(), x.max(), y.min(), y.max()),
+                origin="lower",
+                cmap=cmap
+            )
+        
+        axfreq = plt.axes([0.1, 0.025, 0.8, 0.02])
         valfmt = "%1." + str(len(str(step).split(".")[-1])) + "f"
+        print(valfmt)
         slider = Slider(
             axfreq,
             u"\u0394\u03BD",
@@ -155,6 +160,12 @@ def interact_echelle(
 
         ax.set_xlabel(u"Frequency mod \u0394\u03BD")
         ax.set_ylabel("Frequency")
+        plt.subplots_adjust(
+            left=0.1,
+            right=0.95,
+            bottom=0.1,
+            top=0.95,
+        )
         plt.show()
 
         if return_coords:
@@ -209,6 +220,8 @@ def interact_echelle(
             plot = figure(
                 x_range=(x.min(), x.max()),
                 y_range=(y.min(), y.max()),
+                plot_width=550,
+                plot_height=600
             )
 
             palette = get_bokeh_palette(cmap)
@@ -241,7 +254,7 @@ def interact_echelle(
                     freq,
                     power,
                     new,
-                    sampling=1,
+                    sampling=sampling,
                 )
                 if scale is not None:
                     if scale is "sqrt":
