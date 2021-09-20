@@ -22,12 +22,12 @@
       
 
     
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/sphinx-book-theme.acff12b8f9c144ce68a297486a2fa670.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-book-theme.e2363ea40746bee74734a24ffefccd78.css" />
     
   <link rel="preload" as="script" href="../_static/js/index.1c5a1a01449ed65a7b51.js">
 
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
@@ -54,6 +54,10 @@
         <div class="navbar-brand-box">
     <a class="navbar-brand text-wrap" href="../index.html">
       
+        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
+        
+      
+      
       <img src="../_static/logo.png" class="logo" alt="logo">
       
       
@@ -63,7 +67,7 @@
 </div><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
   <i class="icon fas fa-search"></i>
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
-</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item active">
         <ul class="nav bd-sidenav">
  <li class="toctree-l1">
@@ -167,20 +171,20 @@
             <div class="tocsection onthispage pt-5 pb-3">
                 <i class="fas fa-list"></i> Contents
             </div>
-            <nav id="bd-toc-nav">
+            <nav id="bd-toc-nav" aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#echelle-plotting">
+  <a class="reference internal nav-link" href="#module-echelle.echelle">
    Echelle plotting
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#interactive-echelle">
+  <a class="reference internal nav-link" href="#module-echelle.interact">
    Interactive echelle
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#utilities">
+  <a class="reference internal nav-link" href="#module-echelle.utils">
    Utilities
   </a>
  </li>
@@ -197,14 +201,131 @@
                 
   <div class="section" id="api-documentation">
 <h1>API documentation<a class="headerlink" href="#api-documentation" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="echelle-plotting">
-<h2>Echelle plotting<a class="headerlink" href="#echelle-plotting" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-echelle.echelle">
+<span id="echelle-plotting"></span><h2>Echelle plotting<a class="headerlink" href="#module-echelle.echelle" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="echelle.echelle.echelle">
+<span class="sig-prename descclassname"><span class="pre">echelle.echelle.</span></span><span class="sig-name descname"><span class="pre">echelle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dnu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/echelle/echelle.html#echelle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#echelle.echelle.echelle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the echelle diagram. Use this function if you want to do
+some more custom plotting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>freq</strong> (<em>array-like</em>) – Frequency values</p></li>
+<li><p><strong>power</strong> (<em>array-like</em>) – Power values for every frequency</p></li>
+<li><p><strong>dnu</strong> (<em>float</em>) – Value of deltanu</p></li>
+<li><p><strong>fmin</strong> (<em>float</em><em>, </em><em>optional</em>) – Minimum frequency to calculate the echelle at, by default 0.</p></li>
+<li><p><strong>fmax</strong> (<em>float</em><em>, </em><em>optional</em>) – Maximum frequency to calculate the echelle at. If none is supplied,
+will default to the maximum frequency passed in <cite>freq</cite>, by default None</p></li>
+<li><p><strong>offset</strong> (<em>float</em><em>, </em><em>optional</em>) – An offset to apply to the echelle diagram, by default 0.0</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The x, y, and z values of the echelle diagram.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array-like</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="echelle.echelle.plot_echelle">
+<span class="sig-prename descclassname"><span class="pre">echelle.echelle.</span></span><span class="sig-name descname"><span class="pre">plot_echelle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dnu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Blues'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smooth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smooth_filter_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/echelle/echelle.html#plot_echelle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#echelle.echelle.plot_echelle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the echelle diagram.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>freq</strong> (<em>numpy array</em>) – Frequency values</p></li>
+<li><p><strong>power</strong> (<em>array-like</em>) – Power values for every frequency</p></li>
+<li><p><strong>dnu</strong> (<em>float</em>) – Value of deltanu</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes._subplots.AxesSubplot</em><em>, </em><em>optional</em>) – A matplotlib axes to plot into. If no axes is provided, a new one will
+be generated, by default None</p></li>
+<li><p><strong>cmap</strong> (<em>str</em><em>, </em><em>optional</em>) – A matplotlib colormap, by default ‘BuPu’</p></li>
+<li><p><strong>scale</strong> (<em>str</em><em>, </em><em>optional</em>) – either ‘sqrt’ or ‘log’ or None. Scales the echelle to bring out more
+features, by default ‘sqrt’</p></li>
+<li><p><strong>interpolation</strong> (<em>str</em><em>, </em><em>optional</em>) – Type of interpolation to perform on the echelle diagram through
+matplotlib.pyplot.imshow, by default ‘none’</p></li>
+<li><p><strong>smooth_filter_width</strong> (<em>float</em><em>, </em><em>optional</em>) – Amount by which to smooth the power values, using a Box1DKernel</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – Dictionary of arguments to be passed to <cite>echelle.echelle</cite></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The plotted echelle diagram on the axes</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>matplotlib.axes._subplots.AxesSubplot</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
-<div class="section" id="interactive-echelle">
-<h2>Interactive echelle<a class="headerlink" href="#interactive-echelle" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-echelle.interact">
+<span id="interactive-echelle"></span><h2>Interactive echelle<a class="headerlink" href="#module-echelle.interact" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="echelle.interact.interact_echelle">
+<span class="sig-prename descclassname"><span class="pre">echelle.interact.</span></span><span class="sig-name descname"><span class="pre">interact_echelle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dnu_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dnu_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'BuPu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smooth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smooth_filter_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bokeh'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notebook_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'localhost:8888'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fast'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/echelle/interact.html#interact_echelle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#echelle.interact.interact_echelle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an interactive echelle environment with a variable deltanu
+slider. If you’re working in a Jupyter notebook/lab environment, you must
+call <cite>%matplotlib notebook</cite> before running this.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>freq</strong> (<em>np.array</em>) – Array of frequencies in the amplitude or power spectrum</p></li>
+<li><p><strong>power</strong> (<em>np.array</em>) – Corresponding array of power values</p></li>
+<li><p><strong>dnu_min</strong> (<em>float</em>) – Minimum deltanu value for the slider</p></li>
+<li><p><strong>dnu_max</strong> (<em>float</em>) – Maximum deltanu value for the slider</p></li>
+<li><p><strong>step</strong> (<em>float</em><em>, </em><em>optional</em>) – Step size by which to increment or decrement the slider, by default
+the frequency spacing</p></li>
+<li><p><strong>cmap</strong> (<em>matplotlib.colormap</em><em>, </em><em>optional</em>) – Colormap for the echelle diagram, by default ‘BuPu’</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axis</em><em>, </em><em>optional</em>) – axis object on which to plot. If none is passed, one will be created,
+by default None</p></li>
+<li><p><strong>smooth_filter_width</strong> (<em>float</em><em>, </em><em>optional</em>) – Size of the Box1DKernel which is convolved with the power to smooth the
+spectrum. 1 performs no smoothing, by default 50.</p></li>
+<li><p><strong>scale</strong> (<em>str</em><em>, </em><em>optional</em>) – either ‘sqrt’ or ‘log’ or None. Scales the echelle to bring out more
+features, by default ‘sqrt’</p></li>
+<li><p><strong>return_coords</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, this will bind mouseclick events to the interactive plot.
+Clicking on the plot will store the values of the frequencies
+at the click event, and return them in a list object, by default False</p></li>
+<li><p><strong>plot_method</strong> (<em>str</em><em>, </em><em>'fast'</em><em> or </em><em>'slow'</em>) – Uses either the fast <cite>pcolormesh</cite> function, or the slower <cite>imshow</cite>
+function. pcolormesh is much faster, but does not support
+interpolation.</p></li>
+<li><p><strong>sampling</strong> (<em>float</em>) – </p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – Dictionary of arguments to be passed to <cite>echelle.echelle</cite></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of clicked frequencies if <cite>return_coords=True</cite>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
-<div class="section" id="utilities">
-<h2>Utilities<a class="headerlink" href="#utilities" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-echelle.utils">
+<span id="utilities"></span><h2>Utilities<a class="headerlink" href="#module-echelle.utils" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="echelle.utils.smooth_power">
+<span class="sig-prename descclassname"><span class="pre">echelle.utils.</span></span><span class="sig-name descname"><span class="pre">smooth_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">power</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smooth_filter_width</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/echelle/utils.html#smooth_power"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#echelle.utils.smooth_power" title="Permalink to this definition">¶</a></dt>
+<dd><p>Smooths the input power array with a Box1DKernel from astropy</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>power</strong> (<em>array-like</em>) – Array of power values</p></li>
+<li><p><strong>smooth_filter_width</strong> (<em>float</em>) – filter width</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Smoothed power</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array-like</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 </div>
 
@@ -212,15 +333,27 @@
               </div>
               
         
-        <div class='prev-next-bottom'>
             
-    <a class='left-prev' id="prev-link" href="../notebooks/backend.html" title="previous page">Choosing the backend</a>
 
-        </div>
+
+
+<div class='prev-next-bottom'>
+    
+    <div id="prev">
+        <a class="left-prev" href="../notebooks/backend.html" title="previous page">
+            <i class="prevnext-label fas fa-angle-left"></i>
+            <div class="prevnext-info">
+                <p class="prevnext-label">previous</p>
+                <p class="prevnext-title">Choosing the backend</p>
+            </div>
+        </a>
+    </div>
+
+</div>
         
         </div>
     </div>
-    <footer class="footer mt-5 mt-md-0">
+    <footer class="footer">
     <div class="container">
       <p>
         

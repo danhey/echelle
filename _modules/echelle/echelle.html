@@ -1,0 +1,360 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>echelle.echelle &#8212; echelle  documentation</title>
+    
+  <link href="../../_static/css/theme.css" rel="stylesheet" />
+  <link href="../../_static/css/index.c5995385ac14fb8791e8eb36b4908be2.css" rel="stylesheet" />
+
+    
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    
+      
+
+    
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-book-theme.e2363ea40746bee74734a24ffefccd78.css" />
+    
+  <link rel="preload" as="script" href="../../_static/js/index.1c5a1a01449ed65a7b51.js">
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/sphinx-book-theme.12a9622fbb08dcb3a2a40b2c02b83a57.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="en" />
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<div class="col-12 col-md-3 bd-sidebar site-navigation show" id="site-navigation">
+    
+        <div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="../../index.html">
+      
+        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
+        
+      
+      
+      <img src="../../_static/logo.png" class="logo" alt="logo">
+      
+      
+      <h1 class="site-logo" id="site-title">echelle  documentation</h1>
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        <ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../user/install.html">
+   Installation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../user/citation.html">
+   Citing
+   <em>
+    echelle
+   </em>
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../notebooks/quickstart.html">
+   Quickstart
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../notebooks/backend.html">
+   Choosing the backend
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../user/api.html">
+   API documentation
+  </a>
+ </li>
+</ul>
+
+    </div>
+</nav> <!-- To handle the deprecated key -->
+
+<div class="navbar_extra_footer">
+  Theme by the <a href="https://ebp.jupyterbook.org">Executable Book Project</a>
+</div>
+
+</div>
+
+
+          
+
+
+          
+<main class="col py-md-3 pl-md-4 bd-content overflow-auto" role="main">
+    
+    <div class="topbar container-xl fixed-top">
+    <div class="topbar-contents row">
+        <div class="col-12 col-md-3 bd-topbar-whitespace site-navigation show"></div>
+        <div class="col pl-md-4 topbar-main">
+            
+            <button id="navbar-toggler" class="navbar-toggler ml-0" type="button" data-toggle="collapse"
+                data-toggle="tooltip" data-placement="bottom" data-target=".site-navigation" aria-controls="navbar-menu"
+                aria-expanded="true" aria-label="Toggle navigation" aria-controls="site-navigation"
+                title="Toggle navigation" data-toggle="tooltip" data-placement="left">
+                <i class="fas fa-bars"></i>
+                <i class="fas fa-arrow-left"></i>
+                <i class="fas fa-arrow-up"></i>
+            </button>
+            
+            
+            <!-- Source interaction buttons -->
+
+            <!-- Full screen (wrap in <a> to have style consistency -->
+
+<a class="full-screen-button"><button type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip"
+        data-placement="bottom" onclick="toggleFullScreen()" aria-label="Fullscreen mode"
+        title="Fullscreen mode"><i
+            class="fas fa-expand"></i></button></a>
+
+            <!-- Launch buttons -->
+
+        </div>
+
+        <!-- Table of contents -->
+        <div class="d-none d-md-block col-md-2 bd-toc show">
+            
+        </div>
+    </div>
+</div>
+    <div id="main-content" class="row">
+        <div class="col-12 col-md-9 pl-md-3 pr-md-0">
+        
+              <div>
+                
+  <h1>Source code for echelle.echelle</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">division</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib.widgets</span> <span class="kn">import</span> <span class="n">Slider</span>
+
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">smooth_power</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;echelle&quot;</span><span class="p">,</span> <span class="s2">&quot;plot_echelle&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="echelle"><a class="viewcode-back" href="../../user/api.html#echelle.echelle.echelle">[docs]</a><span class="k">def</span> <span class="nf">echelle</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">power</span><span class="p">,</span> <span class="n">dnu</span><span class="p">,</span> <span class="n">fmin</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">fmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">sampling</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculates the echelle diagram. Use this function if you want to do</span>
+<span class="sd">    some more custom plotting.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    freq : array-like</span>
+<span class="sd">        Frequency values</span>
+<span class="sd">    power : array-like</span>
+<span class="sd">        Power values for every frequency</span>
+<span class="sd">    dnu : float</span>
+<span class="sd">        Value of deltanu</span>
+<span class="sd">    fmin : float, optional</span>
+<span class="sd">        Minimum frequency to calculate the echelle at, by default 0.</span>
+<span class="sd">    fmax : float, optional</span>
+<span class="sd">        Maximum frequency to calculate the echelle at. If none is supplied,</span>
+<span class="sd">        will default to the maximum frequency passed in `freq`, by default None</span>
+<span class="sd">    offset : float, optional</span>
+<span class="sd">        An offset to apply to the echelle diagram, by default 0.0</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    array-like</span>
+<span class="sd">        The x, y, and z values of the echelle diagram.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">fmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fmax</span> <span class="o">=</span> <span class="n">freq</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">fmin</span> <span class="o">=</span> <span class="n">fmin</span> <span class="o">-</span> <span class="n">offset</span>
+    <span class="n">fmax</span> <span class="o">=</span> <span class="n">fmax</span> <span class="o">-</span> <span class="n">offset</span>
+    <span class="n">freq</span> <span class="o">=</span> <span class="n">freq</span> <span class="o">-</span> <span class="n">offset</span>
+
+    <span class="k">if</span> <span class="n">fmin</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="n">fmin</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fmin</span> <span class="o">=</span> <span class="n">fmin</span> <span class="o">-</span> <span class="p">(</span><span class="n">fmin</span> <span class="o">%</span> <span class="n">dnu</span><span class="p">)</span>
+
+    <span class="c1"># trim data</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="p">(</span><span class="n">freq</span> <span class="o">&gt;=</span> <span class="n">fmin</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">freq</span> <span class="o">&lt;=</span> <span class="n">fmax</span><span class="p">)</span>
+    <span class="n">trimx</span> <span class="o">=</span> <span class="n">freq</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+    <span class="n">samplinginterval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">trimx</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">trimx</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="n">sampling</span>
+    <span class="n">xp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">fmin</span><span class="p">,</span> <span class="n">fmax</span> <span class="o">+</span> <span class="n">dnu</span><span class="p">,</span> <span class="n">samplinginterval</span><span class="p">)</span>
+    <span class="n">yp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">xp</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">power</span><span class="p">)</span>
+
+    <span class="n">n_stack</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">fmax</span> <span class="o">-</span> <span class="n">fmin</span><span class="p">)</span> <span class="o">/</span> <span class="n">dnu</span><span class="p">)</span>
+    <span class="n">n_element</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dnu</span> <span class="o">/</span> <span class="n">samplinginterval</span><span class="p">)</span>
+
+    <span class="n">morerow</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_stack</span><span class="p">)</span> <span class="o">*</span> <span class="n">dnu</span>
+    <span class="n">arr2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">arr</span><span class="p">,</span> <span class="n">arr</span><span class="p">])</span>
+    <span class="n">yn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">arr2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;F&quot;</span><span class="p">)</span>
+    <span class="n">yn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">yn</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">yn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">yn</span><span class="p">,</span> <span class="n">n_stack</span> <span class="o">*</span> <span class="n">dnu</span><span class="p">)</span> <span class="o">+</span> <span class="n">fmin</span> <span class="o">+</span> <span class="n">offset</span>
+
+    <span class="n">xn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_element</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_element</span> <span class="o">*</span> <span class="n">dnu</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">n_stack</span> <span class="o">*</span> <span class="n">morerow</span><span class="p">,</span> <span class="n">n_element</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_stack</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">morerow</span><span class="p">,</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">morerow</span><span class="p">):</span>
+            <span class="n">z</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">yp</span><span class="p">[</span><span class="n">n_element</span> <span class="o">*</span> <span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="p">:</span> <span class="n">n_element</span> <span class="o">*</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">xn</span><span class="p">,</span> <span class="n">yn</span><span class="p">,</span> <span class="n">z</span></div>
+
+
+<div class="viewcode-block" id="plot_echelle"><a class="viewcode-back" href="../../user/api.html#echelle.echelle.plot_echelle">[docs]</a><span class="k">def</span> <span class="nf">plot_echelle</span><span class="p">(</span>
+    <span class="n">freq</span><span class="p">,</span>
+    <span class="n">power</span><span class="p">,</span>
+    <span class="n">dnu</span><span class="p">,</span>
+    <span class="c1"># mirror=False,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;Blues&quot;</span><span class="p">,</span>
+    <span class="n">scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">interpolation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">smooth</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">smooth_filter_width</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plots the echelle diagram.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    freq : numpy array</span>
+<span class="sd">        Frequency values</span>
+<span class="sd">    power : array-like</span>
+<span class="sd">        Power values for every frequency</span>
+<span class="sd">    dnu : float</span>
+<span class="sd">        Value of deltanu</span>
+<span class="sd">    ax : matplotlib.axes._subplots.AxesSubplot, optional</span>
+<span class="sd">        A matplotlib axes to plot into. If no axes is provided, a new one will</span>
+<span class="sd">        be generated, by default None</span>
+<span class="sd">    cmap : str, optional</span>
+<span class="sd">        A matplotlib colormap, by default &#39;BuPu&#39;</span>
+<span class="sd">    scale : str, optional</span>
+<span class="sd">        either &#39;sqrt&#39; or &#39;log&#39; or None. Scales the echelle to bring out more</span>
+<span class="sd">        features, by default &#39;sqrt&#39;</span>
+<span class="sd">    interpolation : str, optional</span>
+<span class="sd">        Type of interpolation to perform on the echelle diagram through</span>
+<span class="sd">        matplotlib.pyplot.imshow, by default &#39;none&#39;</span>
+<span class="sd">    smooth_filter_width : float, optional</span>
+<span class="sd">        Amount by which to smooth the power values, using a Box1DKernel</span>
+<span class="sd">    **kwargs : dict</span>
+<span class="sd">        Dictionary of arguments to be passed to `echelle.echelle`</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    matplotlib.axes._subplots.AxesSubplot</span>
+<span class="sd">        The plotted echelle diagram on the axes</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">smooth</span><span class="p">:</span>
+        <span class="n">power</span> <span class="o">=</span> <span class="n">smooth_power</span><span class="p">(</span><span class="n">power</span><span class="p">,</span> <span class="n">smooth_filter_width</span><span class="p">)</span>
+    <span class="n">echx</span><span class="p">,</span> <span class="n">echy</span><span class="p">,</span> <span class="n">echz</span> <span class="o">=</span> <span class="n">echelle</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">power</span><span class="p">,</span> <span class="n">dnu</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">scale</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">scale</span> <span class="ow">is</span> <span class="s2">&quot;log&quot;</span><span class="p">:</span>
+            <span class="n">echz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">echz</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">scale</span> <span class="ow">is</span> <span class="s2">&quot;sqrt&quot;</span><span class="p">:</span>
+            <span class="n">echz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">echz</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+        <span class="n">echz</span><span class="p">,</span>
+        <span class="n">aspect</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+        <span class="n">extent</span><span class="o">=</span><span class="p">(</span><span class="n">echx</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">echx</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">echy</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">echy</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span>
+        <span class="n">origin</span><span class="o">=</span><span class="s2">&quot;lower&quot;</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
+        <span class="n">interpolation</span><span class="o">=</span><span class="n">interpolation</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># It&#39;s much cheaper just to replot the data we already have</span>
+    <span class="c1"># and mirror it.</span>
+    <span class="c1"># if mirror:</span>
+    <span class="c1">#     ax.imshow(</span>
+    <span class="c1">#         echz,</span>
+    <span class="c1">#         aspect=&quot;auto&quot;,</span>
+    <span class="c1">#         extent=(</span>
+    <span class="c1">#             (echx.min() + dnu),</span>
+    <span class="c1">#             (echx.max() + dnu),</span>
+    <span class="c1">#             (echy.min() - dnu),</span>
+    <span class="c1">#             (echy.max()) - dnu,</span>
+    <span class="c1">#         ),</span>
+    <span class="c1">#         origin=&quot;lower&quot;,</span>
+    <span class="c1">#         cmap=cmap,</span>
+    <span class="c1">#         interpolation=interpolation,</span>
+    <span class="c1">#     )</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Frequency&quot;</span> <span class="o">+</span> <span class="s2">&quot; mod &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dnu</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Frequency&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ax</span></div>
+</pre></div>
+
+              </div>
+              
+        
+            
+
+
+
+<div class='prev-next-bottom'>
+    
+
+</div>
+        
+        </div>
+    </div>
+    <footer class="footer">
+    <div class="container">
+      <p>
+        
+          By Daniel R Hey<br/>
+        
+            &copy; Copyright 2021, Daniel R Hey.<br/>
+      </p>
+    </div>
+  </footer>
+</main>
+
+
+      </div>
+    </div>
+  
+  <script src="../../_static/js/index.1c5a1a01449ed65a7b51.js"></script>
+
+  
+  </body>
+</html>
