@@ -117,7 +117,7 @@ def interact_echelle(
         
         axfreq = plt.axes([0.1, 0.025, 0.8, 0.02])
         valfmt = "%1." + str(len(str(step).split(".")[-1])) + "f"
-        print(valfmt)
+
         slider = Slider(
             axfreq,
             u"\u0394\u03BD",
