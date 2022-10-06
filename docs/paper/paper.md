@@ -24,19 +24,14 @@ bibliography: paper.bib
 
 # Summary
 
-Asteroseismology studies the pulsations of stars. The fundamental diagnostics
-of asteroseismology are the frequency of maximum amplitude, $\nu_{\rm max}$, 
-and the separation between modes of equal spherical degree ($\ell$). This separation
-is known as $\Delta\nu$, and relates to the internal constitution of the star
+Asteroseismology is the study of oscillations in stars. One of the most important diagnostics is the frequency separation between modes of equal spherical degree ($\ell$). This separation, written as $\Delta\nu$, is approximately proportional to the mean density of the star (Ulrich 1986; https://ui.adsabs.harvard.edu/abs/1986ApJ...306L..37U/abstract).
 
-A common method of diagnosing $\Delta\nu$ involves creating an echelle diagram,
-where the power spectrum of the star is cut into equal slices of $\Delta\nu$ and 
-stacked atop eachother. Typically, $\Delta\nu$ is then finely adjusted until
-the ridges align.
+A common method of diagnosing $\Delta\nu$ involves creating an echelle diagram, where the power spectrum of the star is cut into equal slices of $\Delta\nu$ and 
+stacked atop eachother. Typically, $\Delta\nu$ is then finely adjusted until the ridges align.
 
-Ever since the echelle diagram was introduced by Grec et al. (1983; https://ui.adsabs.harvard.edu/abs/1983SoPh...82...55G/abstract) for displaying the oscillation frequencies in the Sun, it has become an indispensable tool for helio- and asteroseismology. Its usefulness stems from the fact that p-mode oscillation modes are approximately equally spaced in frequency, with a characteristic spacing of $\Delta\nu$. By dividing the power spectrum into segments of equal length and stacking them vertically, these regularities become more visible. Modes with the same angular degree ($\ell$) align on vertical ridges, making it is easy to identify modes and to follow any deviations from regularity.  To allow fine adjustments, we have developed code that allows the echelle spacing to be changed interactively. This makes it straightforward to choose the best value of $\Delta\nu$ by adjusting the spacing until the ridges are as close to vertical as possible (e.g., Bedding et al 2020; https://ui.adsabs.harvard.edu/abs/2020Natur.581..147B/abstract).
+The echelle diagram was introduced by Grec et al. (1983; https://ui.adsabs.harvard.edu/abs/1983SoPh...82...55G/abstract) for displaying the oscillation frequencies in the Sun, and has become an indispensable tool for helio- and asteroseismology. Its usefulness stems from the fact that p-mode oscillation modes are approximately equally spaced in frequency, with a characteristic spacing of $\Delta\nu$. By dividing the power spectrum into segments of equal length and stacking them vertically, these regularities become more visible. Modes with the same angular degree ($\ell$) align on vertical ridges, making it is easy to identify modes and to follow any deviations from regularity.  To allow fine adjustments, we have developed code that allows the echelle spacing to be changed interactively. This makes it straightforward to choose the best value of $\Delta\nu$ by adjusting the spacing until the ridges are as close to vertical as possible (e.g., Bedding et al 2020; https://ui.adsabs.harvard.edu/abs/2020Natur.581..147B/abstract).
 
-Echelle diagrams can also be used to display gravity modes, which are approximately evenly spaced in period. An example for a red giant star displaying mixed dipolar modes is show in figure 2b of Murphy et al. (2021, arxiv coming soon).
+Echelle diagrams can also be used to display gravity modes, which are approximately evenly spaced in period. An example for a red giant star displaying mixed dipolar modes is show in figure 2b of Murphy et al. (2021, https://ui.adsabs.harvard.edu/abs/2021MNRAS.505.2336M/abstract).
 
 Tim?
 

@@ -55,7 +55,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "**/.ipynb_checkpoints"]
 # a list of builtin themes.
 #
 # html_theme = "press"
-html_theme = "sphinx_book_theme"
+html_theme = "furo"
 html_logo = "logo.png"
 # html_theme_options = {
 #     "logo_only": False,
