@@ -24,7 +24,7 @@ def interact_echelle(
     return_coords=False,
     backend="bokeh",
     notebook_url="localhost:8888",
-    plot_method='fast',
+    plot_method="fast",
     sampling=2,
     **kwargs
 ):
@@ -83,7 +83,9 @@ def interact_echelle(
     if smooth:
         power = smooth_power(power, smooth_filter_width)
 
-    x, y, z = echelle(freq, power, (dnu_max + dnu_min) / 2.0, sampling=sampling, **kwargs)
+    x, y, z = echelle(
+        freq, power, (dnu_max + dnu_min) / 2.0, sampling=sampling, **kwargs
+    )
 
     if scale is "sqrt":
         z = np.sqrt(z)
@@ -91,7 +93,7 @@ def interact_echelle(
         z = np.log10(z)
 
     if step is None:
-        step = 5*np.median(np.diff(freq))
+        step = 5 * np.median(np.diff(freq))
     if backend == "matplotlib":
         # Create the matplotlib version of the interactive
         # form. This should only really be done
@@ -100,27 +102,23 @@ def interact_echelle(
             fig, ax = plt.subplots(figsize=[6.4, 9])
         else:
             fig = plt.gcf()
-        
-        if plot_method is 'fast':
-            line = ax.pcolorfast((x.min(), x.max()),
-                                (y.min(), y.max()), 
-                                z, 
-                                cmap=cmap)
+
+        if plot_method is "fast":
+            line = ax.pcolorfast((x.min(), x.max()), (y.min(), y.max()), z, cmap=cmap)
         else:
             line = ax.imshow(
                 z,
                 aspect="auto",
                 extent=(x.min(), x.max(), y.min(), y.max()),
                 origin="lower",
-                cmap=cmap
+                cmap=cmap,
             )
-        
+
         axfreq = plt.axes([0.1, 0.025, 0.8, 0.02])
         valfmt = "%1." + str(len(str(step).split(".")[-1])) + "f"
-        print(valfmt)
         slider = Slider(
             axfreq,
-            u"\u0394\u03BD",
+            "\u0394\u03BD",
             dnu_min,
             dnu_max,
             valinit=(dnu_max + dnu_min) / 2.0,
@@ -158,7 +156,7 @@ def interact_echelle(
         fig.canvas.mpl_connect("key_press_event", on_key_press)
         slider.on_changed(update)
 
-        ax.set_xlabel(u"Frequency mod \u0394\u03BD")
+        ax.set_xlabel("Frequency mod \u0394\u03BD")
         ax.set_ylabel("Frequency")
         plt.subplots_adjust(
             left=0.1,
@@ -221,7 +219,7 @@ def interact_echelle(
                 x_range=(x.min(), x.max()),
                 y_range=(y.min(), y.max()),
                 plot_width=550,
-                plot_height=600
+                plot_height=600,
             )
 
             palette = get_bokeh_palette(cmap)
@@ -236,7 +234,7 @@ def interact_echelle(
                 palette=palette,
             )
 
-            plot.xaxis.axis_label = u"Frequency mod \u0394\u03BD"
+            plot.xaxis.axis_label = "Frequency mod \u0394\u03BD"
             plot.yaxis.axis_label = "Frequency"
 
             slider = b_Slider(
@@ -244,7 +242,7 @@ def interact_echelle(
                 end=dnu_max,
                 value=(dnu_min + dnu_max) / 2,
                 step=step,
-                title=u"\u0394\u03BD",
+                title="\u0394\u03BD",
                 format="0.000",
             )
 
