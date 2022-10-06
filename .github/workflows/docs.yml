@@ -21,7 +21,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -e .
-        pip install sphinx nbsphinx sphinx_rtd_theme pygments ipython sphinx_book_theme
+        pip install sphinx nbsphinx sphinx_rtd_theme pygments ipython sphinx_book_theme furo
     # BUILD DOCS
     - name: Build
       run: |
