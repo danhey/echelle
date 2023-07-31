@@ -36,7 +36,7 @@ def echelle(freq, power, dnu, fmin=0.0, fmax=None, offset=0.0, sampling=0.1):
     array-like
         The x, y, and z values of the echelle diagram.
     """
-    if fmax is None:
+    if fmax == None:
         fmax = freq[-1]
 
     fmin = fmin - offset
@@ -78,7 +78,7 @@ def plot_echelle(
     freq,
     power,
     dnu,
-    # mirror=False,
+    mirror=False,
     ax=None,
     cmap="Blues",
     scale=None,
@@ -142,20 +142,20 @@ def plot_echelle(
 
     # It's much cheaper just to replot the data we already have
     # and mirror it.
-    # if mirror:
-    #     ax.imshow(
-    #         echz,
-    #         aspect="auto",
-    #         extent=(
-    #             (echx.min() + dnu),
-    #             (echx.max() + dnu),
-    #             (echy.min() - dnu),
-    #             (echy.max()) - dnu,
-    #         ),
-    #         origin="lower",
-    #         cmap=cmap,
-    #         interpolation=interpolation,
-    #     )
+    if mirror:
+        ax.imshow(
+            echz,
+            aspect="auto",
+            extent=(
+                (echx.min() + dnu),
+                (echx.max() + dnu),
+                (echy.min() - dnu),
+                (echy.max()) - dnu,
+            ),
+            origin="lower",
+            cmap=cmap,
+            interpolation=interpolation,
+        )
 
     ax.set_xlabel(r"Frequency" + " mod " + str(dnu))
     ax.set_ylabel(r"Frequency")

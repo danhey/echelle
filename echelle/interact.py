@@ -190,21 +190,7 @@ def interact_echelle(
         # This is a terrible hack and I hate Bokeh
         warnings.simplefilter("ignore", BokehUserWarning)
 
-        from notebook import notebookapp
-
-        # Make sure the user knows to pass in the right notebook_url.
-        servers = list(notebookapp.list_running_servers())
-        ports = [s["port"] for s in servers]
-        if len(np.unique(ports)) > 1:
-            warnings.warn(
-                "You have multiple Jupyter servers open. \
-            You will need to pass the current notebook to `notebook_url`. \
-            i.e. interact_echelle(x,y,notebook_url='http://localhost:8888')",
-                UserWarning,
-            )
-
         def create_interact_ui(doc):
-
             source = ColumnDataSource(
                 data={
                     "image": [z],
