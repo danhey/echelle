@@ -84,7 +84,13 @@ def interact_echelle(
         power = smooth_power(power, smooth_filter_width)
 
     x, y, z = echelle(
-        freq, power, (dnu_max + dnu_min) / 2.0, sampling=sampling, **kwargs
+        freq,
+        power,
+        (dnu_max + dnu_min) / 2.0,
+        sampling=sampling,
+        fmin=freq.min(),
+        fmax=freq.max(),
+        **kwargs
     )
 
     if scale is "sqrt":
@@ -178,17 +184,18 @@ def interact_echelle(
         except:
             raise ImportError("You need to install the Bokeh package.")
 
-        from bokeh.io import show, output_notebook, push_notebook
+        from bokeh.io import show, output_notebook
         from bokeh.plotting import figure, ColumnDataSource
         from bokeh.layouts import column
-        from bokeh.models import CustomJS, ColumnDataSource, FreehandDrawTool
+        from bokeh.models import ColumnDataSource, FreehandDrawTool
         from bokeh.models import Slider as b_Slider
 
         import warnings
         from bokeh.util.warnings import BokehUserWarning
 
-        # This is a terrible hack and I hate Bokeh
         warnings.simplefilter("ignore", BokehUserWarning)
+
+        fmin, fmax = freq.min(), freq.max()
 
         def create_interact_ui(doc):
             source = ColumnDataSource(
@@ -204,8 +211,11 @@ def interact_echelle(
             plot = figure(
                 x_range=(x.min(), x.max()),
                 y_range=(y.min(), y.max()),
-                plot_width=550,
-                plot_height=600,
+                width=600,
+                height=700,
+                resizable=True,
+                # plot_width=550,
+                # plot_height=600,
             )
 
             palette = get_bokeh_palette(cmap)
@@ -238,6 +248,8 @@ def interact_echelle(
                     freq,
                     power,
                     new,
+                    fmin=fmin,
+                    fmax=fmax,
                     sampling=sampling,
                 )
                 if scale is not None:
