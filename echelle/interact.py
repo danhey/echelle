@@ -14,9 +14,9 @@ def make_spectrum_echelles(nu, ps, params):
     echelle_kwargs = {'echelle_type':'replicated', 'plot_with':'imshow'}
     τ = st.make_τ(nu, params)
     f = st.make_f(nu, params)
-    return st.plot_frequency_echelle(nu, ps, params['Δν'], **echelle_kwargs), \
-            st.plot_period_echelle(nu, ps, params['ΔΠ1'], tau=τ,  **echelle_kwargs), \
-            st.plot_frequency_echelle(nu, ps, params['Δν'], f=f, **echelle_kwargs)
+    return st.frequency_echelle(nu, ps, params['Δν'], **echelle_kwargs), \
+            st.period_echelle(nu, ps, params['ΔΠ1'], tau=τ,  **echelle_kwargs), \
+            st.frequency_echelle(nu, ps, params['Δν'], f=f, **echelle_kwargs)
 
 def make_ν_m_echelles(ν_m, params):
     f = st.make_f(ν_m, params)

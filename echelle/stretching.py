@@ -24,7 +24,7 @@ def make_fold(nu, ps, period, n_stack, n_element, idx, echelle_type="single", re
     return base, z
 
 
-def plot_period_echelle(nu, ps, ΔΠ, tau=None, fmin=None, fmax=None, echelle_type='single', plot_with='imshow'):
+def period_echelle(nu, ps, ΔΠ, tau=None, fmin=None, fmax=None, echelle_type='single', plot_with='imshow'):
     '''
     Generate a (stretched) period echelle plot used in asteroseismology.
     
@@ -118,7 +118,7 @@ def plot_period_echelle(nu, ps, ΔΠ, tau=None, fmin=None, fmax=None, echelle_ty
 
 
 
-def plot_frequency_echelle(nu, ps, Δν, f=None, fmin=None, fmax=None, echelle_type='single', plot_with='imshow'):
+def frequency_echelle(nu, ps, Δν, f=None, fmin=None, fmax=None, echelle_type='single', plot_with='imshow'):
     '''
     Generate a (stretched) frequency echelle plot used in asteroseismology.
     
@@ -212,19 +212,6 @@ def plot_frequency_echelle(nu, ps, Δν, f=None, fmin=None, fmax=None, echelle_t
     else:
         return None
 
-def circvar(x, w=None):
-    if w is None:
-        return 1 - np.abs(np.sum(np.exp(1j * x))) / len(x)
-    else:
-        return 1 - np.abs(np.sum(w * np.exp(1j * x))) / np.sum(w)
-
-def circstd(x, w=None):
-    if w is None:
-        return np.sqrt(-2 * np.log( np.abs(np.sum(np.exp(1j * x))) / len(x) ) ) 
-    else:
-        return np.sqrt(-2 * np.log( np.abs(np.sum(w * np.exp(1j * x))) / np.sum(w) ) )
-
-
 def ε_p(ν, params, constant_ε_p=False):
     if constant_ε_p:
         return params['ε_p']
@@ -246,166 +233,69 @@ def make_τ(ν, params, constant_q=False, constant_ε_p=False, constant_d01=True
     return 1/(ν*1e-6) + params['ΔΠ1']/np.pi * np.arctan( q(ν, params, constant_q=constant_q) / np.tan(Theta_p) )
 
 
-def make_ζ(ν, params, constant_ε_p=False, constant_d01=True, constant_q=False):
-    Theta_p = np.pi*(ν/params['Δν'] - (1/2 + ε_p(ν, params, constant_ε_p=constant_ε_p) + d01(ν, params, constant_d01=constant_d01)))
-    Theta_g = np.pi*(params['ε_g'] - 1/(ν*1e-6)/params['ΔΠ1'])
-    q1 = q(ν, params, constant_q=constant_q)
-    return 1/(1 + params['ΔΠ1'] / (params['Δν']*1e-6) * (ν*1e-6)**2 / q1 * np.sin(Theta_g)**2 / np.cos(Theta_p)**2)
-
-
-def dfdε_g(ν, params, constant_q=False):
-    q1 = q(ν, params, constant_q=constant_q)
-    Theta_g = np.pi*(params['ε_g'] - 1/(ν*1e-6)/params['ΔΠ1']) 
-    return (q1 * params['Δν'] * np.sin(Theta_g)**-2. ) / (1 + q1**2.0 * np.tan(Theta_g)**-2.)
-
-
 def d01(ν, params, constant_d01=True):
     if constant_d01:
         return params['d01']
     else:
         return params['d01'] * (params['ν_max'] / ν)
     
-def f_echelle(ν, params, constant_q=False):
-    f = make_f(ν, params, constant_q=constant_q)
-    return f % params['Δν'], ν
 
-def τ_echelle(ν, params, constant_q=False, constant_ε_p=False):
-    τ = make_τ(ν, params, constant_q=constant_q, constant_ε_p=constant_ε_p)
-    return τ % params['ΔΠ1'], ν
+def plot_frequency_echelle(
+    freq,
+    power, 
+    Dnu, 
+    f=None,
+    plot_with='imshow',
+    ax=None,
+    cmap='gray_r',
+    **kwargs
+):
 
-def ν_echelle(ν, params):
-    return ν % params['Δν'], ν
+    if ax is None:
+        fig, ax = plt.subplots()
+    
+    pack = frequency_echelle(freq, power, Dnu, f=f, plot_with=plot_with, **kwargs)
 
-def P_echelle(ν, params):
-    return (1e6/ν) % params['ΔΠ1'], ν
-
-def get_radial_as(ν, n, ν_max,):
-    '''
-        ν = Δν (n + α_p * (n-n_max)^2 ) , where n_max = ν_max / Δν
-
-        c_0 = Δν * α_p  # n^2
-        c_1 = Δν - 2 * α_p * ν_max  # n
-        c_2 = α_p * ν_max**2./Δν + Δν * ε_p  # 1
-    '''
-
-    # nmax = np.interp(ν_max, ν, n)
-    # coeff = np.polyfit(n, ν, 2)
-    # α_p = coeff[0]/coeff[1] / (1 + 2*nmax * coeff[0] / coeff[1])
-    # Δν = coeff[0] / α_p
-    # ε_p = coeff[2] / Δν - α_p * nmax**2.0
-
-    # width estimates based on Yu+2018, Lund+2017, Li+2020
-    k, b = 0.9638, -1.7145
-    width = np.exp(k*np.log(ν_max) + b)
-    w = np.exp(-(ν-ν_max)**2./(2*width**2.))
-    # idx = w>1e-100
-
-    coeff = np.polyfit(n, ν, 2, w=w)
-    Δν = (coeff[1] + (coeff[1]**2. + 8*coeff[0]*ν_max)**0.5) / 2.
-    α_p = coeff[0] / Δν 
-    ε_p = (coeff[2] - α_p * ν_max**2. / Δν ) / Δν
-
-    return Δν, ε_p, α_p
-
-
-def get_model_Δν(ν, n, ν_max):
-    # width estimates based on Yu+2018, Lund+2017, Li+2020
-    k, b = 0.9638, -1.7145
-    width = np.exp(k*np.log(ν_max) + b)
-    w = np.exp(-(ν-ν_max)**2./(2*width**2.))
-    idx = w>1e-100
-
-    if np.sum(idx)>2:
-        p, _, _, _, _ = np.polyfit(n[idx], ν[idx], 1, w=w[idx], full=True)
-        Δν, ε_p = p[0], p[1]/p[0]
+    if plot_with == 'imshow':
+        z, extent = pack
+        ax.imshow(z, extent=extent, aspect='auto', interpolation='nearest', cmap=cmap)
+    elif plot_with == 'contour':
+        z, x, y = pack
+        ax.contour(x, y, z, levels=500, cmap=cmap)
     else:
-        Δν, ε_p = np.nan, np.nan 
+        raise ValueError("Invalid plot_with option. Choose 'imshow' or 'contour'.")
 
-    return Δν, ε_p
+    ax.set_xlabel(r"Frequency" + " mod " + str(Dnu))
+    ax.set_ylabel(r"Frequency")
 
+    return ax
 
-def get_model_δν01(freqs, ls, numax, Dnu):
+def plot_period_echelle(
+    freq,
+    power, 
+    DP, 
+    tau=None,
+    plot_with='imshow',
+    ax=None,
+    cmap='gray_r',
+    **kwargs
+):
 
-    # Dnu_freq, _ = get_model_Dnu(freqs, ls, ns, numax)
-    freq0s = np.sort(freqs[ls==0])
-    freq1s = np.zeros(len(freq0s))
+    if ax is None:
+        fig, ax = plt.subplots()
 
-    for ifreq, freq0 in enumerate(freq0s):
-        idx1 = (freqs>(freq0)) & (freqs<(freq0+Dnu)) & (ls==1)
-        freq1s[ifreq] = np.nan if np.sum(idx1)==0 else freqs[idx1][np.argmin(freqs[idx1])]
-
-    # width estimates based on Yu+2018, Lund+2017, Li+2020
-    k, b = 0.9638, -1.7145
-    width = np.exp(k*np.log(numax) + b)
-    weight = np.exp(-(freq1s-numax)**2./(2*width**2.))
-    idx = (freq1s < numax+3*width) & (freq1s > numax-3*width) & np.isfinite(weight)
-    if np.sum(weight[idx]) == 0.:
-        δν01 = np.nan 
+    pack = period_echelle(freq, power, DP, tau=tau, plot_with=plot_with, **kwargs)
+    
+    if plot_with == 'imshow':
+        z, extent = pack
+        ax.imshow(z, extent=extent, aspect='auto', interpolation='nearest', cmap=cmap)
+    elif plot_with == 'contour':
+        z, x, y = pack
+        ax.contour(x, y, z, levels=500, cmap=cmap)
     else:
-        δν01 = np.average(freq0s[idx] + 0.5*Dnu - freq1s[idx], weights=weight[idx])
-    return δν01
+        raise ValueError("Invalid plot_with option. Choose 'imshow' or 'contour'.")
 
-def get_model_δν02(freqs, ls, numax, Dnu):
+    ax.set_xlabel(r"Period" + " mod " + str(DP))
+    ax.set_ylabel(r"Frequency")
 
-    # Dnu_freq, _ = get_model_Dnu(freqs, ls, ns, numax)
-    freq0s = np.sort(freqs[ls==0])
-    freq2s = np.zeros(len(freq0s))
-
-    for ifreq, freq0 in enumerate(freq0s):
-        idx2 = (freqs>(freq0-0.5*Dnu)) & (freqs<(freq0+0.3*Dnu)) & (ls==2)
-        freq2s[ifreq] = np.nan if np.sum(idx2)==0 else freqs[idx2][np.argmax(freqs[idx2])]
-
-    # width estimates based on Yu+2018, Lund+2017, Li+2020
-    k, b = 0.9638, -1.7145
-    width = np.exp(k*np.log(numax) + b)
-    weight = np.exp(-(freq2s-numax)**2./(2*width**2.))
-    idx = (freq2s < numax+3*width) & (freq2s > numax-3*width)  & np.isfinite(weight)
-    if np.sum(weight[idx]) == 0.:
-        δν02 = np.nan 
-    else:
-        δν02 = np.average(freq0s[idx] - freq2s[idx], weights=weight[idx])
-    return δν02
-
-
-def ν_g_as(ν, params):
-    n = np.arange(np.floor(np.min(1e6/ν)/params['ΔΠ1'])-1, np.floor(np.max(1e6/ν)/params['ΔΠ1']), 1)
-    return params['ΔΠ1'] * (n + params['ε_g'])
-
-def ν_p_as(ν, params, constant_ε_p=False, constant_d01=False):
-    n = np.arange(np.floor(np.min(ν)/params['Δν'])-1, np.floor(np.max(ν)/params['Δν']), 1)
-    return params['Δν'] * (n + 1/2 + ε_p(params['Δν'] * (n + 1/2 + params['ε_p'] + d01(ν, params, constant_d01=constant_d01)), params, constant_ε_p=constant_ε_p) + 
-                                      d01(ν, params, constant_d01=constant_d01))
-
-def make_fp(ν, params):
-    Theta_g = np.pi*(params['ε_g'] - 1/(ν*1e-6)/params['ΔΠ1'])
-    cot = np.tan(Theta_g)**-1.
-    csc = 1/np.sin(Theta_g)
-    c = 1e6
-    num = params['Δν']*(cot*params['q'] - c*np.pi*csc**2.*q(ν, params)/(ν**2.*params['ΔΠ1']))
-    den = np.pi*(1 + cot**2. * q(ν, params)**2.)
-    return 1 - num/den
-
-def make_fpp(ν, params):
-    Theta_g = np.pi*(params['ε_g'] - 1/(ν*1e-6)/params['ΔΠ1'])
-    cot = np.tan(Theta_g)**-1.
-    csc = 1/np.sin(Theta_g)
-    c = 1e6
-    # q = q(ν, p)
-
-    term1 = (1 / (ν**4 * params['ΔΠ1']**2)) * 2 * c**2 * np.pi**2
-    # term2_common = c / (ν * p.ΔΠ1) - p.ε_g
-    term2 = cot * csc**2
-    term3 = q(ν, params)
-    term4 = - (2 * c * np.pi * csc**2 * params['q_k']) / (ν**2 * params['ΔΠ1'])
-    term5 = + (2 * c * np.pi * csc**2 * term3) / (ν**3 * params['ΔΠ1'])
-    term6 = 1 + cot**2 * term3**2
-    
-    first_half = -((params['Δν'] * (term1 * term2 * term3 + term4 + term5)) / (np.pi * term6))
-    
-    term7 = params['Δν'] * (cot * params['q_k'] - (c * np.pi * csc**2 * term3) / (ν**2 * params['ΔΠ1']))
-    term8 = 2 * cot**2 * params['q_k'] * term3 - 1 / (ν**2 * params['ΔΠ1']) * 2 * c * np.pi * cot * csc**2 * term3**2
-    term9 = 1 + cot**2 * term3**2
-    
-    second_half = term7 * term8 / (np.pi * term9**2)
-    
-    return first_half + second_half
+    return ax
