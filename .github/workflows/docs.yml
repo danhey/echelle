@@ -1,0 +1,33 @@
+name: Docs
+on:
+  push:	
+    branches:	
+      - master    
+    paths:
+      - docs/**
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2.3.1 # If you're using actions/checkout@v2 you must set persist-credentials to false in most cases for the deployment to work correctly.
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+
+    - name: Install dependencies
+      run: |
+        sudo apt install pandoc
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+        pip install sphinx nbsphinx sphinx_rtd_theme pygments ipython sphinx_book_theme furo
+    # BUILD DOCS
+    - name: Build
+      run: |
+        make html --directory docs/
+    - name: Deploy
+      uses: JamesIves/github-pages-deploy-action@4.1.1
+      with:
+        branch: gh-pages # The branch the action should deploy to.
+        folder: docs/_build/html # The folder the action should deploy.
