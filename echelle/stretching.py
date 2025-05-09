@@ -24,7 +24,7 @@ def make_fold(nu, ps, period, n_stack, n_element, idx, echelle_type="single", re
     return base, z
 
 
-def period_echelle(nu, ps, ΔΠ, tau=None, fmin=None, fmax=None, echelle_type='single', plot_with='imshow'):
+def plot_period_echelle(nu, ps, ΔΠ, tau=None, fmin=None, fmax=None, echelle_type='single', plot_with='imshow'):
     '''
     Generate a (stretched) period echelle plot used in asteroseismology.
     
@@ -118,7 +118,7 @@ def period_echelle(nu, ps, ΔΠ, tau=None, fmin=None, fmax=None, echelle_type='s
 
 
 
-def frequency_echelle(nu, ps, Δν, f=None, fmin=None, fmax=None, echelle_type='single', plot_with='imshow'):
+def plot_frequency_echelle(nu, ps, Δν, f=None, fmin=None, fmax=None, echelle_type='single', plot_with='imshow'):
     '''
     Generate a (stretched) frequency echelle plot used in asteroseismology.
     
@@ -225,64 +225,59 @@ def circstd(x, w=None):
         return np.sqrt(-2 * np.log( np.abs(np.sum(w * np.exp(1j * x))) / np.sum(w) ) )
 
 
-class AttrDict(dict):
-    def __init__(self, *args, **kwargs):
-        super(AttrDict, self).__init__(*args, **kwargs)
-        self.__dict__ = self
-
 def ε_p(ν, params, constant_ε_p=False):
     if constant_ε_p:
-        return params.ε_p
+        return params['ε_p']
     else:
-        return params.α_p *( (ν - params.ν_max)/params.Δν )**2.0 + params.ε_p
+        return params['α_p'] *( (ν - params['ν_max'])/params['Δν'] )**2.0 + params['ε_p']
 
 def q(ν, params, constant_q=False):
     if constant_q:
-        return params.q
+        return params['q']
     else:
-        return params.q_k * (ν - params.ν_max) + params.q
+        return params['q_k'] * (ν - params['ν_max']) + params['q']
 
 def make_f(ν, params, constant_q=False):
-    Theta_g = np.pi*(params.ε_g - 1/(ν*1e-6)/params.ΔΠ1)
-    return ν - params.Δν/np.pi * np.arctan( q(ν, params, constant_q=constant_q) / np.tan( Theta_g ))
+    Theta_g = np.pi*(params['ε_g'] - 1/(ν*1e-6)/params['ΔΠ1'])
+    return ν - params['Δν']/np.pi * np.arctan( q(ν, params, constant_q=constant_q) / np.tan( Theta_g ))
 
 def make_τ(ν, params, constant_q=False, constant_ε_p=False, constant_d01=True):
-    Theta_p = np.pi*(ν/params.Δν - (1/2 + ε_p(ν, params, constant_ε_p=constant_ε_p) + d01(ν, params, constant_d01=constant_d01)))
-    return 1/(ν*1e-6) + params.ΔΠ1/np.pi * np.arctan( q(ν, params, constant_q=constant_q) / np.tan(Theta_p) )
+    Theta_p = np.pi*(ν/params['Δν'] - (1/2 + ε_p(ν, params, constant_ε_p=constant_ε_p) + d01(ν, params, constant_d01=constant_d01)))
+    return 1/(ν*1e-6) + params['ΔΠ1']/np.pi * np.arctan( q(ν, params, constant_q=constant_q) / np.tan(Theta_p) )
 
 
 def make_ζ(ν, params, constant_ε_p=False, constant_d01=True, constant_q=False):
-    Theta_p = np.pi*(ν/params.Δν - (1/2 + ε_p(ν, params, constant_ε_p=constant_ε_p) + d01(ν, params, constant_d01=constant_d01)))
-    Theta_g = np.pi*(params.ε_g - 1/(ν*1e-6)/params.ΔΠ1)
+    Theta_p = np.pi*(ν/params['Δν'] - (1/2 + ε_p(ν, params, constant_ε_p=constant_ε_p) + d01(ν, params, constant_d01=constant_d01)))
+    Theta_g = np.pi*(params['ε_g'] - 1/(ν*1e-6)/params['ΔΠ1'])
     q1 = q(ν, params, constant_q=constant_q)
-    return 1/(1 + params.ΔΠ1 / (params.Δν*1e-6) * (ν*1e-6)**2 / q1 * np.sin(Theta_g)**2 / np.cos(Theta_p)**2)
+    return 1/(1 + params['ΔΠ1'] / (params['Δν']*1e-6) * (ν*1e-6)**2 / q1 * np.sin(Theta_g)**2 / np.cos(Theta_p)**2)
 
 
 def dfdε_g(ν, params, constant_q=False):
     q1 = q(ν, params, constant_q=constant_q)
-    Theta_g = np.pi*(params.ε_g - 1/(ν*1e-6)/params.ΔΠ1) 
-    return (q1 * params.Δν * np.sin(Theta_g)**-2. ) / (1 + q1**2.0 * np.tan(Theta_g)**-2.)
+    Theta_g = np.pi*(params['ε_g'] - 1/(ν*1e-6)/params['ΔΠ1']) 
+    return (q1 * params['Δν'] * np.sin(Theta_g)**-2. ) / (1 + q1**2.0 * np.tan(Theta_g)**-2.)
 
 
 def d01(ν, params, constant_d01=True):
     if constant_d01:
-        return params.d01
+        return params['d01']
     else:
-        return params.d01 * (params.ν_max / ν)
+        return params['d01'] * (params['ν_max'] / ν)
     
 def f_echelle(ν, params, constant_q=False):
     f = make_f(ν, params, constant_q=constant_q)
-    return f % params.Δν, ν
+    return f % params['Δν'], ν
 
 def τ_echelle(ν, params, constant_q=False, constant_ε_p=False):
     τ = make_τ(ν, params, constant_q=constant_q, constant_ε_p=constant_ε_p)
-    return τ % params.ΔΠ1, ν
+    return τ % params['ΔΠ1'], ν
 
 def ν_echelle(ν, params):
-    return ν % params.Δν, ν
+    return ν % params['Δν'], ν
 
 def P_echelle(ν, params):
-    return (1e6/ν) % params.ΔΠ1, ν
+    return (1e6/ν) % params['ΔΠ1'], ν
 
 def get_radial_as(ν, n, ν_max,):
     '''
@@ -312,11 +307,6 @@ def get_radial_as(ν, n, ν_max,):
 
     return Δν, ε_p, α_p
 
-# def get_radial_as(ν, n):
-#     coeff = np.polyfit(n, ν, 1)
-#     Δν = coeff[0]
-#     ε_p = coeff[1] / Δν
-#     return Δν, ε_p
 
 def get_model_Δν(ν, n, ν_max):
     # width estimates based on Yu+2018, Lund+2017, Li+2020
@@ -378,42 +368,42 @@ def get_model_δν02(freqs, ls, numax, Dnu):
 
 
 def ν_g_as(ν, params):
-    n = np.arange(np.floor(np.min(1e6/ν)/params.ΔΠ1)-1, np.floor(np.max(1e6/ν)/params.ΔΠ1), 1)
-    return params.ΔΠ1 * (n + params.ε_g)
+    n = np.arange(np.floor(np.min(1e6/ν)/params['ΔΠ1'])-1, np.floor(np.max(1e6/ν)/params['ΔΠ1']), 1)
+    return params['ΔΠ1'] * (n + params['ε_g'])
 
 def ν_p_as(ν, params, constant_ε_p=False, constant_d01=False):
-    n = np.arange(np.floor(np.min(ν)/params.Δν)-1, np.floor(np.max(ν)/params.Δν), 1)
-    return params.Δν * (n + 1/2 + ε_p(params.Δν * (n + 1/2 + params.ε_p + d01(ν, params, constant_d01=constant_d01)), params, constant_ε_p=constant_ε_p) + 
+    n = np.arange(np.floor(np.min(ν)/params['Δν'])-1, np.floor(np.max(ν)/params['Δν']), 1)
+    return params['Δν'] * (n + 1/2 + ε_p(params['Δν'] * (n + 1/2 + params['ε_p'] + d01(ν, params, constant_d01=constant_d01)), params, constant_ε_p=constant_ε_p) + 
                                       d01(ν, params, constant_d01=constant_d01))
 
 def make_fp(ν, params):
-    Theta_g = np.pi*(params.ε_g - 1/(ν*1e-6)/params.ΔΠ1)
+    Theta_g = np.pi*(params['ε_g'] - 1/(ν*1e-6)/params['ΔΠ1'])
     cot = np.tan(Theta_g)**-1.
     csc = 1/np.sin(Theta_g)
     c = 1e6
-    num = params.Δν*(cot*params.q - c*np.pi*csc**2.*q(ν, params)/(ν**2.*params.ΔΠ1))
+    num = params['Δν']*(cot*params['q'] - c*np.pi*csc**2.*q(ν, params)/(ν**2.*params['ΔΠ1']))
     den = np.pi*(1 + cot**2. * q(ν, params)**2.)
     return 1 - num/den
 
 def make_fpp(ν, params):
-    Theta_g = np.pi*(params.ε_g - 1/(ν*1e-6)/params.ΔΠ1)
+    Theta_g = np.pi*(params['ε_g'] - 1/(ν*1e-6)/params['ΔΠ1'])
     cot = np.tan(Theta_g)**-1.
     csc = 1/np.sin(Theta_g)
     c = 1e6
     # q = q(ν, p)
 
-    term1 = (1 / (ν**4 * params.ΔΠ1**2)) * 2 * c**2 * np.pi**2
+    term1 = (1 / (ν**4 * params['ΔΠ1']**2)) * 2 * c**2 * np.pi**2
     # term2_common = c / (ν * p.ΔΠ1) - p.ε_g
     term2 = cot * csc**2
     term3 = q(ν, params)
-    term4 = - (2 * c * np.pi * csc**2 * params.q_k) / (ν**2 * params.ΔΠ1)
-    term5 = + (2 * c * np.pi * csc**2 * term3) / (ν**3 * params.ΔΠ1)
+    term4 = - (2 * c * np.pi * csc**2 * params['q_k']) / (ν**2 * params['ΔΠ1'])
+    term5 = + (2 * c * np.pi * csc**2 * term3) / (ν**3 * params['ΔΠ1'])
     term6 = 1 + cot**2 * term3**2
     
-    first_half = -((params.Δν * (term1 * term2 * term3 + term4 + term5)) / (np.pi * term6))
+    first_half = -((params['Δν'] * (term1 * term2 * term3 + term4 + term5)) / (np.pi * term6))
     
-    term7 = params.Δν * (cot * params.q_k - (c * np.pi * csc**2 * term3) / (ν**2 * params.ΔΠ1))
-    term8 = 2 * cot**2 * params.q_k * term3 - 1 / (ν**2 * params.ΔΠ1) * 2 * c * np.pi * cot * csc**2 * term3**2
+    term7 = params['Δν'] * (cot * params['q_k'] - (c * np.pi * csc**2 * term3) / (ν**2 * params['ΔΠ1']))
+    term8 = 2 * cot**2 * params['q_k'] * term3 - 1 / (ν**2 * params['ΔΠ1']) * 2 * c * np.pi * cot * csc**2 * term3**2
     term9 = 1 + cot**2 * term3**2
     
     second_half = term7 * term8 / (np.pi * term9**2)

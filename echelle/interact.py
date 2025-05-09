@@ -14,35 +14,37 @@ def make_spectrum_echelles(nu, ps, params):
     echelle_kwargs = {'echelle_type':'replicated', 'plot_with':'imshow'}
     τ = st.make_τ(nu, params)
     f = st.make_f(nu, params)
-    return st.frequency_echelle(nu, ps, params.Δν, **echelle_kwargs), st.period_echelle(nu, ps, params.ΔΠ1, tau=τ,  **echelle_kwargs), st.frequency_echelle(nu, ps, params.Δν, f=f, **echelle_kwargs)
+    return st.plot_frequency_echelle(nu, ps, params['Δν'], **echelle_kwargs), \
+            st.plot_period_echelle(nu, ps, params['ΔΠ1'], tau=τ,  **echelle_kwargs), \
+            st.plot_frequency_echelle(nu, ps, params['Δν'], f=f, **echelle_kwargs)
 
 def make_ν_m_echelles(ν_m, params):
     f = st.make_f(ν_m, params)
     τ = st.make_τ(ν_m, params)
-    return (np.r_[ν_m % params.Δν, ν_m % params.Δν + params.Δν], np.r_[ν_m, ν_m - params.Δν]),  \
-            (np.r_[τ % params.ΔΠ1, τ % params.ΔΠ1 + params.ΔΠ1], np.r_[ν_m, ν_m]), \
-            (np.r_[f % params.Δν, f % params.Δν + params.Δν], np.r_[ν_m, ν_m - params.Δν])
+    return (np.r_[ν_m % params['Δν'], ν_m % params['Δν'] + params['Δν']], np.r_[ν_m, ν_m - params['Δν']]),  \
+            (np.r_[τ % params['ΔΠ1'], τ % params['ΔΠ1'] + params['ΔΠ1']], np.r_[ν_m, ν_m]), \
+            (np.r_[f % params['Δν'], f % params['Δν'] + params['Δν']], np.r_[ν_m, ν_m - params['Δν']])
 
 def make_ν_p_echelles(ν_p, params):
-    return  (np.r_[ν_p % params.Δν, ν_p % params.Δν + params.Δν], np.r_[ν_p, ν_p - params.Δν])
+    return  (np.r_[ν_p % params['Δν'], ν_p % params['Δν'] + params['Δν']], np.r_[ν_p, ν_p - params['Δν']])
 
 def make_ν_g_echelles(ν_g, params):
-    return  (np.r_[(1e6/ν_g) % params.ΔΠ1, (1e6/ν_g) % params.ΔΠ1 + params.ΔΠ1], np.r_[ν_g, ν_g])
+    return  (np.r_[(1e6/ν_g) % params['ΔΠ1'], (1e6/ν_g) % params['ΔΠ1'] + params['ΔΠ1']], np.r_[ν_g, ν_g])
 
 def make_ν_0_echelles(ν_0, params):
-    return (np.r_[ν_0 % params.Δν, ν_0 % params.Δν + params.Δν ], np.r_[ν_0, ν_0 - params.Δν])
+    return (np.r_[ν_0 % params['Δν'], ν_0 % params['Δν'] + params['Δν'] ], np.r_[ν_0, ν_0 - params['Δν']])
 
 def make_vlines(params):
-    return ((params.ε_p%1)*params.Δν, (params.ε_p%1+1.)*params.Δν), \
-        ((params.ε_g%1)*params.ΔΠ1, ((params.ε_g%1)+1.)*params.ΔΠ1), \
-        (((params.ε_p+0.5+params.d01)%1)*params.Δν, ((params.ε_p+0.5+params.d01)%1+1)*params.Δν)
+    return ((params['ε_p']%1)*params['Δν'], (params['ε_p']%1+1.)*params['Δν']), \
+        ((params['ε_g']%1)*params['ΔΠ1'], ((params['ε_g']%1)+1.)*params['ΔΠ1']), \
+        (((params['ε_p']+0.5+params['d01'])%1)*params['Δν'], ((params['ε_p']+0.5+params['d01'])%1+1)*params['Δν'])
     
 
 def interact_stretched_echelle(params, nu=None, ps=None, ν_m=None, ν_p=None, ν_g=None, ν_0=None, show_vlines=False,
         
 ):
 
-        params = st.AttrDict(params) # AttrDict({'ΔΠ1': 84.84, 'q': 0.31, 'q_k':0., 'Δν':17.277, 'ε_p':0.289, 'ε_g':0.7, 'd01': 0.00, 'α_p': 0., 'ν_max':0.})
+        params = params # AttrDict({'ΔΠ1': 84.84, 'q': 0.31, 'q_k':0., 'Δν':17.277, 'ε_p':0.289, 'ε_g':0.7, 'd01': 0.00, 'α_p': 0., 'ν_max':0.})
 
         flag_spectra = False # an array of l=1 π mode frequencies
         flag_ν_m = False # an array of l=1 mixed mode frequencies
@@ -109,7 +111,7 @@ def interact_stretched_echelle(params, nu=None, ps=None, ν_m=None, ν_p=None, �
         ax[1].set_xlabel(r"$\tau$ mod $\Delta\Pi_1$ [s]"); # ax[1].set_ylabel(r'$\nu$ [$\mu$Hz]')
         ax[2].set_xlabel(r"$f$ mod $\Delta\nu$ [$\mu$Hz]"); # ax[2].set_ylabel(r'$\nu$ [$\mu$Hz]')
 
-        ax[0].set_xlim(0, params.Δν*2.); ax[1].set_xlim(0, params.ΔΠ1*2.); ax[2].set_xlim(0, params.Δν*2.); 
+        ax[0].set_xlim(0, params['Δν']*2.); ax[1].set_xlim(0, params['ΔΠ1']*2.); ax[2].set_xlim(0, params['Δν']*2.); 
 
         # adjust the main plot to make room for the sliders
         fig.subplots_adjust(bottom=0.40)
@@ -117,18 +119,18 @@ def interact_stretched_echelle(params, nu=None, ps=None, ν_m=None, ν_p=None, �
         # make horizontal sliders to control the parameters
         xstart, width, height, ystart = 0.15, 0.7, 0.025, 0.05
 
-        ΔΠ1_slider = Slider(ax=fig.add_axes([xstart, ystart+0*0.04, width, height]), label=r'$\Delta\Pi_1$', valmin=40, valmax=360, valinit=params.ΔΠ1,)
-        q_slider = Slider(ax=fig.add_axes([xstart, ystart+1*0.04, width, height]), label=r"$q$",valmin=0.,valmax=1.0,valinit=params.q)
-        q_k_slider = Slider(ax=fig.add_axes([xstart, ystart+2*0.04, width, height]),label=r"$q_k$",valmin=-1e-2,valmax=1e-2,valinit=params.q_k)
-        d01_slider = Slider(ax=fig.add_axes([xstart, ystart+3*0.04, width, height]), label=r"$d_{01}$",valmin=-0.25,valmax=0.25,valinit=params.d01)
-        Δν_slider = Slider(ax=fig.add_axes([xstart, ystart+4*0.04, width, height]), label=r"$\Delta\nu$",valmin=params.Δν*0.8,valmax=params.Δν*1.2,valinit=params.Δν)
-        ε_p_slider = Slider(ax=fig.add_axes([xstart, ystart+5*0.04, width, height]), label=r"$\epsilon_p$",valmin=0.,valmax=2.0,valinit=params.ε_p)
-        ε_g_slider = Slider(ax=fig.add_axes([xstart, ystart+6*0.04, width, height]), label=r"$\epsilon_g$",valmin=0.,valmax=1.0,valinit=params.ε_g)
+        ΔΠ1_slider = Slider(ax=fig.add_axes([xstart, ystart+0*0.04, width, height]), label=r'$\Delta\Pi_1$', valmin=40, valmax=360, valinit=params['ΔΠ1'],)
+        q_slider = Slider(ax=fig.add_axes([xstart, ystart+1*0.04, width, height]), label=r"$q$",valmin=0.,valmax=1.0,valinit=params['q'])
+        q_k_slider = Slider(ax=fig.add_axes([xstart, ystart+2*0.04, width, height]),label=r"$q_k$",valmin=-1e-2,valmax=1e-2,valinit=params['q_k'])
+        d01_slider = Slider(ax=fig.add_axes([xstart, ystart+3*0.04, width, height]), label=r"$d_{01}$",valmin=-0.25,valmax=0.25,valinit=params['d01'])
+        Δν_slider = Slider(ax=fig.add_axes([xstart, ystart+4*0.04, width, height]), label=r"$\Delta\nu$",valmin=params['Δν']*0.8,valmax=params['Δν']*1.2,valinit=params['Δν'])
+        ε_p_slider = Slider(ax=fig.add_axes([xstart, ystart+5*0.04, width, height]), label=r"$\epsilon_p$",valmin=0.,valmax=2.0,valinit=params['ε_p'])
+        ε_g_slider = Slider(ax=fig.add_axes([xstart, ystart+6*0.04, width, height]), label=r"$\epsilon_g$",valmin=0.,valmax=1.0,valinit=params['ε_g'])
 
         # define the function to be called anytime a slider's value changes
         def update(val):
-            pu = st.AttrDict({ 'ΔΠ1': ΔΠ1_slider.val, 'q': q_slider.val, 'q_k': q_k_slider.val, 'd01': d01_slider.val, 'ε_g': ε_g_slider.val, 
-                            'Δν': Δν_slider.val, 'ε_p':  ε_p_slider.val, 'α_p': params.α_p, 'ν_max':params.ν_max})
+            pu = { 'ΔΠ1': ΔΠ1_slider.val, 'q': q_slider.val, 'q_k': q_k_slider.val, 'd01': d01_slider.val, 'ε_g': ε_g_slider.val, 
+                    'Δν': Δν_slider.val, 'ε_p':  ε_p_slider.val, 'α_p': params['α_p'], 'ν_max':params['ν_max']}
 
             # modify plots
             if flag_spectra:
