@@ -85,7 +85,7 @@ def plot_echelle(
     interpolation=None,
     smooth=False,
     smooth_filter_width=50,
-    **kwargs
+    **kwargs,
 ):
     """Plots the echelle diagram.
 
