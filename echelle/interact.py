@@ -376,12 +376,12 @@ def interact_echelle(
         **kwargs,
     )
 
-    if scale is "sqrt":
+    if scale == "sqrt":
         z = np.sqrt(z)
-    elif scale is "log":
+    elif scale == "log":
         z = np.log10(z)
 
-    if step is None:
+    if step == None:
         step = 5 * np.median(np.diff(freq))
     if backend == "matplotlib":
         # Create the matplotlib version of the interactive
@@ -392,7 +392,7 @@ def interact_echelle(
         else:
             fig = plt.gcf()
 
-        if plot_method is "fast":
+        if plot_method == "fast":
             line = ax.pcolorfast((x.min(), x.max()), (y.min(), y.max()), z, cmap=cmap)
         else:
             line = ax.imshow(
@@ -418,9 +418,9 @@ def interact_echelle(
         def update(dnu):
             x, y, z = echelle(freq, power, dnu, sampling=1, **kwargs)
             if scale is not None:
-                if scale is "sqrt":
+                if scale == "sqrt":
                     z = np.sqrt(z)
-                elif scale is "log":
+                elif scale == "log":
                     z = np.log10(z)
             line.set_array(z)
             line.set_extent((x.min(), x.max(), y.min(), y.max()))
@@ -536,9 +536,9 @@ def interact_echelle(
                     sampling=sampling,
                 )
                 if scale is not None:
-                    if scale is "sqrt":
+                    if scale == "sqrt":
                         z = np.sqrt(z)
-                    elif scale is "log":
+                    elif scale == "log":
                         z = np.log10(z)
                 full_plot.data_source.data["image"] = [z]
                 full_plot.data_source.data["dw"] = [x.max() - x.min()]

@@ -123,9 +123,9 @@ def plot_echelle(
     echx, echy, echz = echelle(freq, power, dnu, **kwargs)
 
     if scale is not None:
-        if scale is "log":
+        if scale == "log":
             echz = np.log10(echz)
-        elif scale is "sqrt":
+        elif scale == "sqrt":
             echz = np.sqrt(echz)
 
     if ax is None:
