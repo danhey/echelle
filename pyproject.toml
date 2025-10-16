@@ -18,6 +18,7 @@ classifiers = [
 dependencies = [
     "bokeh",
     'importlib-metadata; python_version<"3.8"',
+    'ipywidgets'
 ]
 
 [project.optional-dependencies]
