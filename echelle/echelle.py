@@ -4,14 +4,13 @@ import warnings
 
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.widgets import Slider
 
 from .utils import smooth_power
 
 __all__ = ["echelle", "plot_echelle"]
 
 
-def echelle(freq, power, dnu, fmin=0.0, fmax=None, offset=0.0, sampling=0.1):
+def echelle(freq, power, dnu, fmin=0.0, fmax=None, offset=0.0):
     """Calculates the echelle diagram. Use this function if you want to do
     some more custom plotting.
 
@@ -33,8 +32,8 @@ def echelle(freq, power, dnu, fmin=0.0, fmax=None, offset=0.0, sampling=0.1):
 
     Returns
     -------
-    array-like
-        The x, y, and z values of the echelle diagram.
+    z : array-like
+        The 2D array of the echelle
     """
     if fmax == None:
         fmax = freq[-1]
@@ -49,29 +48,18 @@ def echelle(freq, power, dnu, fmin=0.0, fmax=None, offset=0.0, sampling=0.1):
         fmin = fmin - (fmin % dnu)
 
     # trim data
-    index = (freq >= fmin) & (freq <= fmax)
-    trimx = freq[index]
+    m = (freq >= fmin) & (freq <= fmax)
+    freq, power = freq[m], power[m]
 
-    samplinginterval = np.median(trimx[1:-1] - trimx[0:-2]) * sampling
-    xp = np.arange(fmin, fmax + dnu, samplinginterval)
-    yp = np.interp(xp, freq, power)
+    # wack ass speedup
+    split_indices = np.where(np.diff(freq % dnu / dnu) < 0)[0] + 1
+    a_split = np.split(power, split_indices)
+    max_length = max(len(row) for row in a_split)
+    z = np.zeros((len(a_split), max_length))
+    for i, row in enumerate(a_split):
+        z[i, : len(row)] = row
 
-    n_stack = int((fmax - fmin) / dnu)
-    n_element = int(dnu / samplinginterval)
-
-    morerow = 2
-    arr = np.arange(1, n_stack) * dnu
-    arr2 = np.array([arr, arr])
-    yn = np.reshape(arr2, len(arr) * 2, order="F")
-    yn = np.insert(yn, 0, 0.0)
-    yn = np.append(yn, n_stack * dnu) + fmin + offset
-
-    xn = np.arange(1, n_element + 1) / n_element * dnu
-    z = np.zeros([n_stack * morerow, n_element])
-    for i in range(n_stack):
-        for j in range(i * morerow, (i + 1) * morerow):
-            z[j, :] = yp[n_element * (i) : n_element * (i + 1)]
-    return xn, yn, z
+    return z
 
 
 def plot_echelle(
@@ -85,7 +73,7 @@ def plot_echelle(
     interpolation=None,
     smooth=False,
     smooth_filter_width=50,
-    **kwargs
+    **kwargs,
 ):
     """Plots the echelle diagram.
 
@@ -120,21 +108,30 @@ def plot_echelle(
     """
     if smooth:
         power = smooth_power(power, smooth_filter_width)
-    echx, echy, echz = echelle(freq, power, dnu, **kwargs)
+    echz = echelle(freq, power, dnu, **kwargs)
 
     if scale is not None:
-        if scale is "log":
+        if scale == "log":
             echz = np.log10(echz)
-        elif scale is "sqrt":
+        elif scale == "sqrt":
             echz = np.sqrt(echz)
 
     if ax is None:
         fig, ax = plt.subplots()
 
+    if "fmin" in kwargs:
+        fmin = kwargs["fmin"]
+    else:
+        fmin = freq[0]
+    if "fmax" in kwargs:
+        fmax = kwargs["fmax"]
+    else:
+        fmax = freq[-1]
+
     ax.imshow(
         echz,
         aspect="auto",
-        extent=(echx.min(), echx.max(), echy.min(), echy.max()),
+        extent=(0, dnu, fmin, fmax),
         origin="lower",
         cmap=cmap,
         interpolation=interpolation,
@@ -142,20 +139,20 @@ def plot_echelle(
 
     # It's much cheaper just to replot the data we already have
     # and mirror it.
-    if mirror:
-        ax.imshow(
-            echz,
-            aspect="auto",
-            extent=(
-                (echx.min() + dnu),
-                (echx.max() + dnu),
-                (echy.min() - dnu),
-                (echy.max()) - dnu,
-            ),
-            origin="lower",
-            cmap=cmap,
-            interpolation=interpolation,
-        )
+    # if mirror:
+    #     ax.imshow(
+    #         echz,
+    #         aspect="auto",
+    #         extent=(
+    #             (echx.min() + dnu),
+    #             (echx.max() + dnu),
+    #             (echy.min() - dnu),
+    #             (echy.max()) - dnu,
+    #         ),
+    #         origin="lower",
+    #         cmap=cmap,
+    #         interpolation=interpolation,
+    #     )
 
     ax.set_xlabel(r"Frequency" + " mod " + str(dnu))
     ax.set_ylabel(r"Frequency")
