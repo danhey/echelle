@@ -5,6 +5,8 @@ from .utils import smooth_power
 
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
+from ipywidgets import FloatSlider, VBox, HBox, Label, interactive_output
+from IPython.display import display
 import numpy as np
 from . import stretching as st
 
@@ -302,13 +304,13 @@ def interact_echelle(
     cmap="BuPu",
     ax=None,
     smooth=False,
+    stepsize=10,
     smooth_filter_width=50.0,
     scale=None,
     return_coords=False,
-    backend="bokeh",
+    backend="matplotlib",
     notebook_url="localhost:8888",
     plot_method="fast",
-    sampling=2,
     **kwargs,
 ):
     """Creates an interactive echelle environment with a variable deltanu
@@ -366,13 +368,20 @@ def interact_echelle(
     if smooth:
         power = smooth_power(power, smooth_filter_width)
 
-    x, y, z = echelle(
+    if "fmin" in kwargs:
+        fmin = kwargs["fmin"]
+    else:
+        fmin = freq[0]
+    if "fmax" in kwargs:
+        fmax = kwargs["fmax"]
+    else:
+        fmax = freq[-1]
+
+    dnu_initial = (dnu_max + dnu_min) / 2.0
+    z = echelle(
         freq,
         power,
-        (dnu_max + dnu_min) / 2.0,
-        sampling=sampling,
-        fmin=freq.min(),
-        fmax=freq.max(),
+        dnu_initial,
         **kwargs,
     )
 
@@ -382,29 +391,30 @@ def interact_echelle(
         z = np.log10(z)
 
     if step == None:
-        step = 5 * np.median(np.diff(freq))
+        step = stepsize * np.median(np.diff(freq))
     if backend == "matplotlib":
         # Create the matplotlib version of the interactive
-        # form. This should only really be done
-        # if the user is working from the terminal.
+        # form.
         if ax is None:
-            fig, ax = plt.subplots(figsize=[6.4, 9])
+            fig, ax = plt.subplots(figsize=[4, 6])
         else:
             fig = plt.gcf()
 
         if plot_method == "fast":
-            line = ax.pcolorfast((x.min(), x.max()), (y.min(), y.max()), z, cmap=cmap)
+            line = ax.pcolorfast((0, dnu_initial), (fmin, fmax), z, cmap=cmap)
         else:
             line = ax.imshow(
                 z,
                 aspect="auto",
-                extent=(x.min(), x.max(), y.min(), y.max()),
+                extent=(0, dnu_initial, fmin, fmax),
                 origin="lower",
                 cmap=cmap,
             )
+        line.set_extent((0, dnu_initial, fmin, fmax))
+        ax.set_xlim(0, dnu_initial)
 
         axfreq = plt.axes([0.1, 0.025, 0.8, 0.02])
-        valfmt = "%1." + str(len(str(step).split(".")[-1])) + "f"
+        valfmt = -int(np.floor(np.log10(abs(step))))
         slider = Slider(
             axfreq,
             "\u0394\u03bd",
@@ -412,20 +422,21 @@ def interact_echelle(
             dnu_max,
             valinit=(dnu_max + dnu_min) / 2.0,
             valstep=step,
-            valfmt=valfmt,
+            valfmt=f"%1.{valfmt}f",
         )
 
         def update(dnu):
-            x, y, z = echelle(freq, power, dnu, sampling=1, **kwargs)
+            z = echelle(freq, power, dnu, **kwargs)
             if scale is not None:
                 if scale == "sqrt":
                     z = np.sqrt(z)
                 elif scale == "log":
                     z = np.log10(z)
             line.set_array(z)
-            line.set_extent((x.min(), x.max(), y.min(), y.max()))
+            line.set_extent((0, dnu, fmin, fmax))
             ax.set_xlim(0, dnu)
-            fig.canvas.blit(ax.bbox)
+            fig.canvas.draw_idle()
+            # fig.canvas.blit(ax.bbox)
 
         def on_key_press(event):
             if event.key == "left":
@@ -438,9 +449,9 @@ def interact_echelle(
             slider.set_val(new_dnu)
             update(new_dnu)
 
-        def on_click(event):
-            ix, iy = event.xdata, event.ydata
-            coords.append((ix, iy))
+        # def on_click(event):
+        #     ix, iy = event.xdata, event.ydata
+        #     coords.append((ix, iy))
 
         fig.canvas.mpl_connect("key_press_event", on_key_press)
         slider.on_changed(update)
@@ -455,10 +466,10 @@ def interact_echelle(
         )
         plt.show()
 
-        if return_coords:
-            coords = []
-            fig.canvas.mpl_connect("button_press_event", on_click)
-            return coords
+        # if return_coords:
+        #     coords = []
+        #     fig.canvas.mpl_connect("button_press_event", on_click)
+        #     return coords
 
     elif backend == "bokeh":
         # Otherwise we use Bokeh.
